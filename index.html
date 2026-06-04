@@ -160,7 +160,7 @@ button:disabled{
 /* 遊戲畫面 1:1 */
 #gameScreen{
   display:grid;
-  grid-template-rows:7% 22% 8% 17% 36% 10%;
+  grid-template-rows:7% 22% 8% 18% 45%;
   gap:5px;
   padding:8px;
 }
@@ -619,10 +619,6 @@ button:disabled{
 
   <div class="options" id="options"></div>
 
-  <div class="bottomBar">
-    連續答對可提高倍率，HP歸零或20題結束即結算
-  </div>
-
   <div id="bossIntro" class="hidden">
     <div class="introCard">
       <div class="introWarn">⚠ Boss 登場 ⚠</div>
@@ -650,9 +646,16 @@ button:disabled{
       <div class="stat">平均作答<strong id="rAvgTime">0秒</strong></div>
       <div class="stat">最高 Combo<strong id="rMaxCombo">0</strong></div>
       <div class="stat">剩餘 HP<strong id="rHp">0</strong></div>
+      <div class="stat">本次成就<strong id="rAchievements">0 / 6</strong></div>
     </div>
 
     <div class="resultCard">
+      <div class="panelTitle">本次達成成就</div>
+      <div id="achievedList"></div>
+      <hr style="border-color:rgba(255,255,255,.12)">
+      <div class="panelTitle">差一點達成</div>
+      <div id="missedList"></div>
+      <hr style="border-color:rgba(255,255,255,.12)">
       <div class="panelTitle">題型表現</div>
       <div id="typeStats"></div>
       <hr style="border-color:rgba(255,255,255,.12)">
@@ -994,6 +997,7 @@ function startGame(){
     questions:buildQuestionSet(),index:0,
     heroHp:50,combo:0,maxCombo:0,
     bossIndex:0,bossHp:BOSSES[0].hp,totalDamage:0,correct:0,totalAnswered:0,totalTimeUsed:0,
+    fast14:0,maxFast14:0,fast12:0,maxFast12:0,
     locked:false,timeLeft:15,maxTime:15,finalResult:null,typeResult:{}
   };
   Object.keys(TYPE_LABEL).forEach(k=>state.typeResult[k]={correct:0,total:0});
@@ -1080,6 +1084,20 @@ function answerQuestion(choice){
     state.combo++;
     state.maxCombo=Math.max(state.maxCombo,state.combo);
 
+    if(state.timeLeft>=14){
+      state.fast14++;
+    }else{
+      state.fast14=0;
+    }
+    state.maxFast14=Math.max(state.maxFast14,state.fast14);
+
+    if(state.timeLeft>=12){
+      state.fast12++;
+    }else{
+      state.fast12=0;
+    }
+    state.maxFast12=Math.max(state.maxFast12,state.fast12);
+
     const dmg=calculateDamage();
     applyDamage(dmg);
     showFeedback(true,`造成 ${dmg} 傷害`,"");
@@ -1091,6 +1109,8 @@ function answerQuestion(choice){
     buttons[q.answer].classList.add("correct");
 
     state.combo=0;
+    state.fast14=0;
+    state.fast12=0;
     state.heroHp=Math.max(0,state.heroHp-10);
 
     showFeedback(false,`正確答案：${q.options[q.answer]}`,q.explanation);
@@ -1201,9 +1221,10 @@ function finishGame(){
   const killed=Math.min(state.bossIndex,BOSSES.length);
   const accuracy=state.totalAnswered?Math.round(state.correct/state.totalAnswered*100):0;
   const avg=state.totalAnswered?(state.totalTimeUsed/state.totalAnswered).toFixed(1):"0.0";
-  const title=getTitle(killed,accuracy,state.maxCombo);
+  const title=getTitle(killed);
+  const achievementData=getAchievementResults(killed,accuracy,Number(avg));
 
-  state.finalResult={killed,totalDamage:state.totalDamage,accuracy,avgTime:Number(avg),maxCombo:state.maxCombo,hp:state.heroHp,title,date:new Date().toLocaleDateString()};
+  state.finalResult={killed,totalDamage:state.totalDamage,accuracy,avgTime:Number(avg),maxCombo:state.maxCombo,hp:state.heroHp,title,achievements:achievementData.achieved.length,date:new Date().toLocaleDateString()};
 
   document.getElementById("rBoss").textContent=`${killed} / 5`;
   document.getElementById("rDamage").textContent=state.totalDamage;
@@ -1211,7 +1232,10 @@ function finishGame(){
   document.getElementById("rAvgTime").textContent=`${avg}秒`;
   document.getElementById("rMaxCombo").textContent=state.maxCombo;
   document.getElementById("rHp").textContent=state.heroHp;
+  document.getElementById("rAchievements").textContent=`${achievementData.achieved.length} / 6`;
   document.getElementById("finalTitle").textContent=`稱號：${title}`;
+
+  renderAchievements(achievementData);
 
   const box=document.getElementById("typeStats");
   box.innerHTML="";
@@ -1230,13 +1254,78 @@ function finishGame(){
   showScreen("result");
 }
 
-function getTitle(killed,acc,combo){
-  if(killed>=5&&acc>=90&&combo>=10)return"單位圓之神";
-  if(killed>=5)return"三角大師";
-  if(killed>=4)return"象限騎士";
-  if(killed>=3)return"單位圓戰士";
-  if(killed>=2)return"象限學徒";
-  return"三角村村民";
+function getTitle(killed){
+  if(killed>=5)return"魔神討伐者";
+  if(killed>=4)return"魔族剋星";
+  if(killed>=3)return"王國守衛者";
+  if(killed>=2)return"地城探索者";
+  if(killed>=1)return"哥布林殺手";
+  return"路過的村民";
+}
+
+function getAchievementResults(killed,accuracy,avgTime){
+  const list=[
+    {
+      name:"百發百中",
+      icon:"🎯",
+      achieved:accuracy===100 && state.totalAnswered===20,
+      condition:"正確率 100%",
+      current:`本次：${accuracy}%`
+    },
+    {
+      name:"連擊宗師",
+      icon:"⚔️",
+      achieved:state.maxCombo>=15,
+      condition:"最高 Combo ≥ 15",
+      current:`本次：${state.maxCombo}`
+    },
+    {
+      name:"閃電反應",
+      icon:"⚡",
+      achieved:state.maxFast14>=5,
+      condition:"連續 5 題於剩餘 14 秒以上答對",
+      current:`本次：${state.maxFast14} / 5`
+    },
+    {
+      name:"完美節奏",
+      icon:"🎵",
+      achieved:state.maxFast12>=10,
+      condition:"連續 10 題於剩餘 12 秒以上答對",
+      current:`本次：${state.maxFast12} / 10`
+    },
+    {
+      name:"神話降臨",
+      icon:"🌟",
+      achieved:state.totalDamage>=3700,
+      condition:"總傷害 ≥ 3700",
+      current:`本次：${state.totalDamage}`
+    },
+    {
+      name:"屹立不搖",
+      icon:"🛡️",
+      achieved:state.totalAnswered===20 && state.heroHp>0,
+      condition:"完成 20 題且 HP > 0",
+      current:`本次：${state.totalAnswered} / 20 題，HP ${state.heroHp}`
+    }
+  ];
+
+  return {
+    achieved:list.filter(x=>x.achieved),
+    missed:list.filter(x=>!x.achieved)
+  };
+}
+
+function renderAchievements(data){
+  const achievedBox=document.getElementById("achievedList");
+  const missedBox=document.getElementById("missedList");
+
+  achievedBox.innerHTML=data.achieved.length
+    ? data.achieved.map(a=>`<div class="typeStat">✓ ${a.icon} ${a.name}<br><span style="color:var(--sub);font-size:.9em;">條件：${a.condition}<br>${a.current}</span></div>`).join("")
+    : `<div class="typeStat">本次尚未達成隱藏成就</div>`;
+
+  missedBox.innerHTML=data.missed.length
+    ? data.missed.map(a=>`<div class="typeStat">□ ${a.icon} ${a.name}<br><span style="color:var(--sub);font-size:.9em;">條件：${a.condition}<br>${a.current}</span></div>`).join("")
+    : `<div class="typeStat">全部隱藏成就皆已達成</div>`;
 }
 
 function storageGet(k,f){try{return JSON.parse(localStorage.getItem(k))??f}catch{return f}}
