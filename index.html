@@ -841,7 +841,15 @@ const TRANSFORMS=[
 function generateTransform(sub=null){
   const pool=sub?TRANSFORMS.filter(x=>x[0]===sub):TRANSFORMS;
   const [s,q,ans,exp]=rand(pool);
-  return makeMCQ(q,ans,["sinθ","-sinθ","cosθ","-cosθ","tanθ","-tanθ","1/tanθ","-1/tanθ"],{
+
+  let optionsPool;
+  if(q.startsWith("tan")){
+    optionsPool=["tanθ","-tanθ","1/tanθ","-1/tanθ"];
+  }else{
+    optionsPool=["sinθ","-sinθ","cosθ","-cosθ"];
+  }
+
+  return makeMCQ(q,ans,optionsPool,{
     type:"transform",subtype:s,
     signature:`transform-${q}`,
     explanation:exp
