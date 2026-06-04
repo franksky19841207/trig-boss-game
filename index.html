@@ -532,7 +532,13 @@ button:disabled{
   font-size:clamp(14px,2.8vw,20px);
   color:var(--sub);
   margin:7px 0;
+  padding:4px 6px;
+  border-radius:8px;
 }
+
+.typeGood{color:var(--green);}
+.typeMid{color:var(--gold);}
+.typeBad{color:var(--red);}
 
 .nameInput{
   width:100%;
@@ -614,7 +620,7 @@ button:disabled{
 
   <div class="battleArea" id="battleArea">
     <div class="fighter" id="heroSide">
-      <div class="fighterIcon heroIcon">🧙‍♂️</div>
+      <div class="fighterIcon heroIcon">🥷</div>
       <div class="fighterName">勇者</div>
       <div class="hpText" id="heroHpText">HP 50 / 50</div>
       <div class="barOuter"><div class="barInner heroHpBar" id="heroHpBar"></div></div>
@@ -698,9 +704,9 @@ button:disabled{
 const BOSSES=[
   {name:"角度史萊姆王",hp:500,icon:"👾"},
   {name:"象限狼人王",hp:600,icon:"🐺"},
-  {name:"單位圓巨人",hp:700,icon:"🧊"},
+  {name:"單位圓守護者",hp:700,icon:"🌀"},
   {name:"函數黑龍",hp:800,icon:"🐉"},
-  {name:"三角魔神",hp:1050,icon:"😈"}
+  {name:"三角魔神",hp:1050,icon:"👹"}
 ];
 
 const ANGLES=[0,30,45,60,90,120,135,150,180,210,225,240,270,300,315,330,360];
@@ -1269,7 +1275,8 @@ function finishGame(){
     const r=state.typeResult[type];
     if(r&&r.total>0){
       const d=document.createElement("div");
-      d.className="typeStat";
+      const ratio=r.correct/r.total;
+      d.className="typeStat " + (ratio===1 ? "typeGood" : ratio>=0.5 ? "typeMid" : "typeBad");
       d.textContent=`${TYPE_LABEL[type]}：${r.correct} / ${r.total}`;
       box.appendChild(d);
     }
@@ -1346,12 +1353,12 @@ function renderAchievements(data){
   const missedBox=document.getElementById("missedList");
 
   achievedBox.innerHTML=data.achieved.length
-    ? data.achieved.map(a=>`<div class="typeStat">✓ ${a.icon} ${a.name}<br><span style="color:var(--sub);font-size:.9em;">條件：${a.condition}<br>${a.current}</span></div>`).join("")
+    ? data.achieved.map(a=>`<div class="typeStat typeGood">✓ ${a.icon} ${a.name}<br><span style="color:var(--sub);font-size:.9em;">條件：${a.condition}<br>${a.current}</span></div>`).join("")
     : `<div class="typeStat">本次尚未達成隱藏成就</div>`;
 
   missedBox.innerHTML=data.missed.length
     ? data.missed.map(a=>`<div class="typeStat">□ ${a.icon} ${a.name}<br><span style="color:var(--sub);font-size:.9em;">條件：${a.condition}<br>${a.current}</span></div>`).join("")
-    : `<div class="typeStat">全部隱藏成就皆已達成</div>`;
+    : `<div class="typeStat typeGood">全部隱藏成就皆已達成</div>`;
 }
 
 function storageGet(k,f){try{return JSON.parse(localStorage.getItem(k))??f}catch{return f}}
@@ -1406,7 +1413,7 @@ function renderLeaderboard(id){
   const el=document.getElementById(id);
   if(!el)return;
   if(list.length===0){el.innerHTML=`<div class="line">尚無紀錄</div>`;return}
-  el.innerHTML=list.map((r,i)=>`<div class="line">${i+1}. ${r.name}｜${r.killed}/5王｜傷害${r.totalDamage}｜${r.accuracy}%｜C${r.maxCombo}</div>`).join("");
+  el.innerHTML=list.map((r,i)=>`<div class="line">${i+1}. ${r.name}｜${r.title||getTitle(r.killed)}｜${r.killed}/5王｜傷害${r.totalDamage}｜${r.accuracy}%｜C${r.maxCombo}</div>`).join("");
 }
 
 function backHome(){
