@@ -564,6 +564,77 @@ button:disabled{
 }
 
 
+
+/* 共用全畫面彈窗 */
+#modalOverlay{
+  position:absolute;
+  inset:0;
+  z-index:60;
+  background:rgba(0,0,0,.78);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  backdrop-filter:blur(3px);
+}
+
+.modalCard{
+  width:88%;
+  height:78%;
+  background:linear-gradient(160deg,rgba(30,33,51,.98),rgba(14,16,28,.98));
+  border:2px solid rgba(255,255,255,.18);
+  border-radius:20px;
+  box-shadow:0 18px 60px rgba(0,0,0,.55);
+  display:grid;
+  grid-template-rows:auto 1fr auto;
+  overflow:hidden;
+}
+
+.modalTitle{
+  color:var(--gold);
+  font-size:clamp(24px,5.5vw,44px);
+  font-weight:900;
+  text-align:center;
+  padding:14px 14px 8px;
+}
+
+.modalBody{
+  padding:8px 16px;
+  overflow-y:auto;
+}
+
+.modalLine{
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:12px;
+  padding:10px;
+  margin-bottom:8px;
+  color:var(--sub);
+  font-size:clamp(15px,3vw,22px);
+  line-height:1.35;
+}
+
+.modalBtn{
+  margin:10px;
+  padding:12px 10px;
+  font-size:clamp(18px,3.5vw,26px);
+  font-weight:900;
+}
+
+.clickableTitle{
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+}
+
+.clickHint{
+  color:var(--sub);
+  font-size:.75em;
+  font-weight:700;
+}
+
 /* 錯題回顧 */
 #reviewScreen{
   padding:14px;
@@ -633,70 +704,6 @@ button:disabled{
   font-weight:900;
 }
 
-
-/* 共用資訊彈窗 */
-#infoModal{
-  position:absolute;
-  inset:0;
-  background:rgba(0,0,0,.78);
-  z-index:60;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  backdrop-filter:blur(3px);
-}
-
-.modalCard{
-  width:88%;
-  height:78%;
-  background:linear-gradient(160deg,rgba(32,36,58,.98),rgba(14,16,28,.98));
-  border:2px solid rgba(255,255,255,.18);
-  border-radius:22px;
-  box-shadow:0 20px 70px rgba(0,0,0,.6);
-  display:grid;
-  grid-template-rows:auto 1fr auto;
-  gap:10px;
-  padding:14px;
-}
-
-.modalTitle{
-  color:var(--gold);
-  font-size:clamp(26px,6vw,46px);
-  font-weight:900;
-  text-align:center;
-}
-
-.modalContent{
-  background:rgba(0,0,0,.18);
-  border:1px solid rgba(255,255,255,.1);
-  border-radius:16px;
-  padding:12px;
-  overflow-y:auto;
-}
-
-.modalContent .line,
-.modalContent .typeStat{
-  font-size:clamp(16px,3.2vw,24px);
-  margin:8px 0;
-}
-
-.modalCloseBtn{
-  width:100%;
-  padding:12px 10px;
-  font-size:clamp(18px,3.5vw,28px);
-  font-weight:900;
-}
-
-.clickablePanelTitle{
-  cursor:pointer;
-}
-
-.clickHint{
-  color:var(--gold);
-  font-size:.75em;
-  margin-left:6px;
-}
-
 @media (max-width:500px){
   #app{padding:4px}
   .screen{border-radius:14px}
@@ -720,16 +727,16 @@ button:disabled{
 
   <div class="homePanels">
     <div class="panel">
-      <div class="panelTitle clickablePanelTitle" onclick="openModalFromElement('最高紀錄', 'bestRecords')">最高紀錄 <span class="clickHint">點開</span></div>
+      <div class="panelTitle clickableTitle" onclick="showBestModal()">最高紀錄 <span class="clickHint">點開</span></div>
       <div id="bestRecords"></div>
       <button class="smallBtn" onclick="resetData()">清除本機紀錄</button>
     </div>
 
     <div class="panel">
-      <div class="panelTitle clickablePanelTitle" onclick="openModalFromElement('Boss Collection', 'bossCollection')">Boss Collection <span class="clickHint">點開</span></div>
+      <div class="panelTitle clickableTitle" onclick="showBossModal()">Boss Collection <span class="clickHint">點開</span></div>
       <div id="bossCollection"></div>
       <hr style="border-color:rgba(255,255,255,.12)">
-      <div class="panelTitle clickablePanelTitle" onclick="openModalFromElement('排行榜 Top 10', 'homeLeaderboard')">排行榜 Top 10 <span class="clickHint">點開</span></div>
+      <div class="panelTitle clickableTitle" onclick="showRankModal()">排行榜 Top 10 <span class="clickHint">點開</span></div>
       <div id="homeLeaderboard"></div>
     </div>
   </div>
@@ -808,16 +815,16 @@ button:disabled{
     </div>
 
     <div class="resultCard">
-      <div class="panelTitle clickablePanelTitle" onclick="openModalFromElement('本次達成成就', 'achievedList')">本次達成成就 <span class="clickHint">點開</span></div>
+      <div class="panelTitle clickableTitle" onclick="showAchievementModal()">本次達成成就 <span class="clickHint">點開</span></div>
       <div id="achievedList"></div>
       <hr style="border-color:rgba(255,255,255,.12)">
-      <div class="panelTitle clickablePanelTitle" onclick="openModalFromElement('差一點達成', 'missedList')">差一點達成 <span class="clickHint">點開</span></div>
+      <div class="panelTitle clickableTitle" onclick="showMissedModal()">差一點達成 <span class="clickHint">點開</span></div>
       <div id="missedList"></div>
       <hr style="border-color:rgba(255,255,255,.12)">
-      <div class="panelTitle clickablePanelTitle" onclick="openModalFromElement('題型表現', 'typeStats')">題型表現 <span class="clickHint">點開</span></div>
+      <div class="panelTitle clickableTitle" onclick="showTypeModal()">題型表現 <span class="clickHint">點開</span></div>
       <div id="typeStats"></div>
       <hr style="border-color:rgba(255,255,255,.12)">
-      <div class="panelTitle clickablePanelTitle" onclick="openModalFromElement('排行榜', 'resultLeaderboard')">排行榜 <span class="clickHint">點開</span></div>
+      <div class="panelTitle clickableTitle" onclick="showRankModal()">排行榜 <span class="clickHint">點開</span></div>
       <div id="resultLeaderboard"></div>
     </div>
   </div>
@@ -847,12 +854,12 @@ button:disabled{
 </div>
 
 
-<!-- 共用資訊彈窗 -->
-<div id="infoModal" class="hidden">
+<!-- 共用彈窗 -->
+<div id="modalOverlay" class="hidden">
   <div class="modalCard">
-    <div class="modalTitle" id="modalTitle">資訊</div>
-    <div class="modalContent" id="modalContent"></div>
-    <button class="modalCloseBtn" onclick="closeModal()">關閉</button>
+    <div class="modalTitle" id="modalTitle">標題</div>
+    <div class="modalBody" id="modalBody"></div>
+    <button class="modalBtn" onclick="closeModal()">關閉</button>
   </div>
 </div>
 
@@ -1555,7 +1562,12 @@ function saveRank(){
   storageSet("trigBossRanks",list.slice(0,10));
   currentRankSaved=true;
   renderLeaderboard("resultLeaderboard");
-  renderHome();
+  
+document.getElementById("modalOverlay").addEventListener("click", function(e){
+  if(e.target.id==="modalOverlay")closeModal();
+});
+
+renderHome();
 }
 
 function renderHome(){
@@ -1586,19 +1598,75 @@ function renderLeaderboard(id){
 
 function openModal(title, html){
   document.getElementById("modalTitle").textContent=title;
-  document.getElementById("modalContent").innerHTML=html && html.trim()
-    ? html
-    : `<div class="line">目前沒有資料</div>`;
-  document.getElementById("infoModal").classList.remove("hidden");
-}
-
-function openModalFromElement(title, elementId){
-  const el=document.getElementById(elementId);
-  openModal(title, el ? el.innerHTML : `<div class="line">目前沒有資料</div>`);
+  document.getElementById("modalBody").innerHTML=html || `<div class="modalLine">沒有資料</div>`;
+  document.getElementById("modalOverlay").classList.remove("hidden");
 }
 
 function closeModal(){
-  document.getElementById("infoModal").classList.add("hidden");
+  document.getElementById("modalOverlay").classList.add("hidden");
+}
+
+function showBestModal(){
+  const b=storageGet("trigBossBest",{highestBoss:0,highestCombo:0,highestAccuracy:0,fastestAvgTime:null,highestDamage:0,playCount:0});
+  openModal("最高紀錄", `
+    <div class="modalLine">最高擊殺：${b.highestBoss} / 5 王</div>
+    <div class="modalLine">最高傷害：${b.highestDamage}</div>
+    <div class="modalLine">最高 Combo：${b.highestCombo}</div>
+    <div class="modalLine">最高正確率：${b.highestAccuracy}%</div>
+    <div class="modalLine">最快平均：${b.fastestAvgTime===null?"-":b.fastestAvgTime+"秒"}</div>
+    <div class="modalLine">遊玩次數：${b.playCount}</div>
+  `);
+}
+
+function showBossModal(){
+  const u=storageGet("trigBossUnlocked",[]);
+  openModal("Boss Collection", BOSSES.map((x,i)=>`
+    <div class="modalLine">${u.includes(i)?"✓":"□"} ${x.icon} ${x.name}<br><span style="color:var(--sub);font-size:.9em;">HP ${x.hp}</span></div>
+  `).join(""));
+}
+
+function rankHtml(){
+  const list=storageGet("trigBossRanks",[]);
+  if(list.length===0)return `<div class="modalLine">尚無紀錄</div>`;
+  return list.map((r,i)=>`
+    <div class="modalLine">${i+1}. ${r.name}<br>
+    稱號：${r.title||getTitle(r.killed)}<br>
+    ${r.killed}/5 王｜傷害 ${r.totalDamage}｜正確率 ${r.accuracy}%｜Combo ${r.maxCombo}</div>
+  `).join("");
+}
+
+function showRankModal(){
+  openModal("排行榜 Top 10", rankHtml());
+}
+
+function showAchievementModal(){
+  if(!state?.finalResult)return;
+  const data=getAchievementResults(state.finalResult.killed,state.finalResult.accuracy,state.finalResult.avgTime);
+  const html=data.achieved.length
+    ? data.achieved.map(a=>`<div class="modalLine">✓ ${a.icon} ${a.name}<br>條件：${a.condition}<br>${a.current}</div>`).join("")
+    : `<div class="modalLine">本次尚未達成隱藏成就</div>`;
+  openModal("本次達成成就", html);
+}
+
+function showMissedModal(){
+  if(!state?.finalResult)return;
+  const data=getAchievementResults(state.finalResult.killed,state.finalResult.accuracy,state.finalResult.avgTime);
+  const html=data.missed.length
+    ? data.missed.map(a=>`<div class="modalLine">□ ${a.icon} ${a.name}<br>條件：${a.condition}<br>${a.current}</div>`).join("")
+    : `<div class="modalLine">全部隱藏成就皆已達成</div>`;
+  openModal("差一點達成", html);
+}
+
+function showTypeModal(){
+  if(!state?.finalResult)return;
+  const rows=Object.keys(TYPE_LABEL).map(type=>{
+    const r=state.typeResult[type];
+    if(!r||r.total===0)return "";
+    const ratio=r.correct/r.total;
+    const color=ratio===1?"var(--green)":ratio>=0.5?"var(--gold)":"var(--red)";
+    return `<div class="modalLine"><span style="color:${color};font-weight:900;">${TYPE_LABEL[type]}：${r.correct} / ${r.total}</span></div>`;
+  }).join("");
+  openModal("題型表現", rows || `<div class="modalLine">沒有資料</div>`);
 }
 
 
@@ -1635,16 +1703,12 @@ function backHome(){
 }
 
 function resetData(){
-  if(!confirm("確定要清除本機紀錄、排行榜與Boss圖鑑嗎？"))return;
+  if(!confirm("確定要清除本機紀錄嗎？\n包含最高紀錄、排行榜與 Boss 圖鑑都會清空。"))return;
   localStorage.removeItem("trigBossBest");
   localStorage.removeItem("trigBossRanks");
   localStorage.removeItem("trigBossUnlocked");
   renderHome();
 }
-
-document.getElementById("infoModal").addEventListener("click",function(e){
-  if(e.target.id==="infoModal")closeModal();
-});
 
 renderHome();
 </script>
