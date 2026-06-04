@@ -805,6 +805,7 @@ button:disabled{
 
   <div class="resultGrid">
     <div class="resultCard">
+      <div class="panelTitle clickableTitle" onclick="showResultStatsModal()">本次戰績 <span class="clickHint">點開</span></div>
       <div class="stat">擊殺 Boss<strong id="rBoss">0 / 5</strong></div>
       <div class="stat">總傷害<strong id="rDamage">0</strong></div>
       <div class="stat">正確率<strong id="rAccuracy">0%</strong></div>
@@ -1650,6 +1651,22 @@ function rankHtml(){
 
 function showRankModal(){
   openModal("排行榜 Top 10", rankHtml());
+}
+
+
+function showResultStatsModal(){
+  if(!state?.finalResult)return;
+  const r=state.finalResult;
+  openModal("本次戰績", `
+    <div class="modalLine">主稱號：${r.title}</div>
+    <div class="modalLine">擊殺 Boss：${r.killed} / 5</div>
+    <div class="modalLine">總傷害：${r.totalDamage}</div>
+    <div class="modalLine">正確率：${r.accuracy}%</div>
+    <div class="modalLine">平均作答：${r.avgTime} 秒</div>
+    <div class="modalLine">最高 Combo：${r.maxCombo}</div>
+    <div class="modalLine">剩餘 HP：${r.hp}</div>
+    <div class="modalLine">本次成就：${r.achievements} / 6</div>
+  `);
 }
 
 function showAchievementModal(){
