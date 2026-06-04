@@ -160,9 +160,9 @@ button:disabled{
 /* 遊戲畫面 1:1 */
 #gameScreen{
   display:grid;
-  grid-template-rows:8% 28% 19% 45%;
-  gap:5px;
-  padding:8px;
+  grid-template-rows:7.5% 5% 26% 18% 43.5%;
+  gap:4px;
+  padding:7px;
 }
 
 .topBar{
@@ -296,6 +296,72 @@ button:disabled{
 @keyframes pulse{
   from{transform:scale(1)}
   to{transform:scale(1.08)}
+}
+
+
+.soundBtn{
+  width:clamp(28px,5vw,42px);
+  height:clamp(24px,4.5vw,36px);
+  padding:0;
+  border-radius:10px;
+  box-shadow:none;
+  font-size:clamp(15px,3vw,24px);
+  line-height:1;
+}
+
+.timeArea{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:0;
+}
+
+.timeTrack{
+  position:relative;
+  width:100%;
+  height:clamp(13px,2.4vw,20px);
+  border-radius:999px;
+  background:rgba(0,0,0,.35);
+  border:1px solid rgba(255,255,255,.16);
+  overflow:hidden;
+}
+
+.timeFill{
+  position:absolute;
+  right:0;
+  top:0;
+  height:100%;
+  width:100%;
+  border-radius:999px;
+  background:linear-gradient(90deg,var(--blue),var(--green));
+  transition:width .25s linear, background .25s linear;
+}
+
+.timeFill.warn{
+  background:linear-gradient(90deg,var(--gold),#ff9f1c);
+}
+
+.timeFill.danger{
+  background:linear-gradient(90deg,var(--red),#ff9f1c);
+  animation:pulseBar .45s infinite alternate;
+}
+
+.timeLabel{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--text);
+  font-size:clamp(11px,2.2vw,17px);
+  font-weight:900;
+  text-shadow:0 2px 4px rgba(0,0,0,.8);
+  pointer-events:none;
+}
+
+@keyframes pulseBar{
+  from{filter:brightness(1)}
+  to{filter:brightness(1.45)}
 }
 
 .questionArea{
@@ -755,7 +821,14 @@ button:disabled{
     </div>
     <div class="topRight">
       <span class="multiplier" id="multiplierText">倍率 ×1.0</span>
-      <span class="timer" id="timerText">15秒</span>
+      <button class="soundBtn" id="soundBtn" onclick="toggleSound()">🔇</button>
+    </div>
+  </div>
+
+  <div class="timeArea">
+    <div class="timeTrack">
+      <div class="timeFill" id="timeFill"></div>
+      <div class="timeLabel" id="timerText">15秒</div>
     </div>
   </div>
 
@@ -892,6 +965,8 @@ equal:"等值判斷",compare:"比較大小",operation:"雙函數運算",judge:"�
 };
 
 let state=null,timer=null,currentRankSaved=false;
+let soundOn=false;
+let audioCtx=null;
 
 function rand(a){return a[Math.floor(Math.random()*a.length)]}
 function shuffle(a){let b=[...a];for(let i=b.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]]}return b}
@@ -1188,6 +1263,78 @@ function buildQuestionSet(){
   return [...fallback,generateEqual(),generateCompare(),generateOperation(),generateJudge()];
 }
 
+
+function initAudio(){
+  if(!audioCtx){
+    audioCtx=new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if(audioCtx.state==="suspended"){
+    audioCtx.resume();
+  }
+}
+
+function toggleSound(){
+  soundOn=!soundOn;
+  localStorage.setItem("trigBossSound", soundOn ? "1" : "0");
+  document.getElementById("soundBtn").textContent=soundOn ? "🔊" : "🔇";
+  if(soundOn){
+    initAudio();
+    playTone(660,.05,.04);
+  }
+}
+
+function loadSoundSetting(){
+  soundOn=localStorage.getItem("trigBossSound")==="1";
+  const btn=document.getElementById("soundBtn");
+  if(btn)btn.textContent=soundOn ? "🔊" : "🔇";
+}
+
+function playTone(freq=440,duration=.08,volume=.035,type="sine",delay=0){
+  if(!soundOn)return;
+  try{
+    initAudio();
+    const t=audioCtx.currentTime+delay;
+    const osc=audioCtx.createOscillator();
+    const gain=audioCtx.createGain();
+    osc.type=type;
+    osc.frequency.setValueAtTime(freq,t);
+    gain.gain.setValueAtTime(0,t);
+    gain.gain.linearRampToValueAtTime(volume,t+.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001,t+duration);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start(t);
+    osc.stop(t+duration+.02);
+  }catch(e){}
+}
+
+function playCorrectSound(){
+  playTone(660,.07,.035,"sine",0);
+  playTone(880,.08,.035,"sine",.06);
+}
+
+function playWrongSound(){
+  playTone(180,.13,.045,"sawtooth",0);
+  playTone(120,.16,.035,"sawtooth",.08);
+}
+
+function playBossSound(finalClear=false){
+  if(finalClear){
+    playTone(523,.10,.045,"triangle",0);
+    playTone(659,.10,.045,"triangle",.08);
+    playTone(784,.14,.05,"triangle",.16);
+    playTone(1046,.18,.05,"triangle",.28);
+  }else{
+    playTone(392,.08,.045,"triangle",0);
+    playTone(523,.08,.045,"triangle",.07);
+    playTone(784,.12,.05,"triangle",.14);
+  }
+}
+
+function playTickSound(){
+  playTone(900,.035,.018,"square",0);
+}
+
 function startGame(){
   clearInterval(timer);
   currentRankSaved=false;
@@ -1258,8 +1405,17 @@ function startTimer(){
 
 function updateTimer(){
   const t=document.getElementById("timerText");
-  t.textContent=`${state.timeLeft}秒`;
-  t.classList.toggle("low",state.timeLeft<=5);
+  const fill=document.getElementById("timeFill");
+  if(t)t.textContent=`${state.timeLeft}秒`;
+  if(fill){
+    const pct=Math.max(0,Math.min(100,state.timeLeft/15*100));
+    fill.style.width=`${pct}%`;
+    fill.classList.toggle("warn",state.timeLeft<=8&&state.timeLeft>3);
+    fill.classList.toggle("danger",state.timeLeft<=3);
+  }
+  if(state.timeLeft>0 && state.timeLeft<=5){
+    playTickSound();
+  }
 }
 
 function answerQuestion(choice){
@@ -1305,8 +1461,10 @@ function answerQuestion(choice){
       const lastDefeated=hitResult.defeated[hitResult.defeated.length-1];
 
       if(hitResult.cleared){
+        playBossSound(true);
         showFeedback(true,`🏆 恭喜通關！`,`${lastDefeated.icon} ${lastDefeated.name} 已被討伐<br>總傷害：${state.totalDamage}<br><br>點一下查看戰績`,true);
       }else{
+        playBossSound(false);
         const nextBoss=BOSSES[state.bossIndex];
         showFeedback(true,`💥 Boss擊破！`,`${lastDefeated.icon} ${lastDefeated.name} 已被討伐<br><br>下一位：${nextBoss.icon} ${nextBoss.name}<br>點一下迎接下一個 Boss`,true);
       }
@@ -1327,6 +1485,7 @@ function answerQuestion(choice){
       return;
     }
 
+    playCorrectSound();
     showFeedback(true,`造成 ${dmg} 傷害`,"");
     setTimeout(nextQuestion,520);
   }else{
@@ -1346,6 +1505,7 @@ function answerQuestion(choice){
       correctAnswer: q.options[q.answer]
     });
 
+    playWrongSound();
     showFeedback(false,`正確答案：${q.options[q.answer]}`,q.explanation,true);
     animateBossAttack();
     updateUI();
@@ -1617,6 +1777,7 @@ document.getElementById("modalOverlay").addEventListener("click", function(e){
   if(e.target.id==="modalOverlay")closeModal();
 });
 
+loadSoundSetting();
 renderHome();
 }
 
