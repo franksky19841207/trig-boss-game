@@ -1479,7 +1479,7 @@ function finishGame(){
   const title=getTitle(killed);
   const achievementData=getAchievementResults(killed,accuracy,Number(avg));
 
-  state.finalResult={killed,totalDamage:state.totalDamage,accuracy,avgTime:Number(avg),maxCombo:state.maxCombo,hp:state.heroHp,title,achievements:achievementData.achieved.length,date:new Date().toLocaleDateString()};
+  state.finalResult={killed,totalDamage:state.totalDamage,accuracy,avgTime:Number(avg),maxCombo:state.maxCombo,hp:state.heroHp,title,achievements:achievementData.achieved.length,answered:state.totalAnswered,date:new Date().toLocaleDateString()};
 
   document.getElementById("rBoss").textContent=`${killed} / 5`;
   document.getElementById("rDamage").textContent=state.totalDamage;
@@ -1599,7 +1599,7 @@ function updateBestRecords(r){
   b.highestAccuracy=Math.max(b.highestAccuracy,r.accuracy);
   b.highestDamage=Math.max(b.highestDamage,r.totalDamage);
   b.playCount++;
-  if(r.avgTime>0&&(b.fastestAvgTime===null||r.avgTime<b.fastestAvgTime))b.fastestAvgTime=r.avgTime;
+  if(r.answered===20 && r.avgTime>0 && (b.fastestAvgTime===null||r.avgTime<b.fastestAvgTime))b.fastestAvgTime=r.avgTime;
   storageSet("trigBossBest",b);
 }
 
@@ -1627,7 +1627,7 @@ function renderHome(){
     <div class="line">最高傷害：${b.highestDamage}</div>
     <div class="line">最高 Combo：${b.highestCombo}</div>
     <div class="line">最高正確率：${b.highestAccuracy}%</div>
-    <div class="line">最快平均：${b.fastestAvgTime===null?"-":b.fastestAvgTime+"秒"}</div>
+    <div class="line">最快平均：${b.fastestAvgTime===null?"-":b.fastestAvgTime+"秒"}（完成20題）</div>
     <div class="line">遊玩次數：${b.playCount}</div>
   `;
 
@@ -1663,7 +1663,7 @@ function showBestModal(){
     <div class="modalLine">最高傷害：${b.highestDamage}</div>
     <div class="modalLine">最高 Combo：${b.highestCombo}</div>
     <div class="modalLine">最高正確率：${b.highestAccuracy}%</div>
-    <div class="modalLine">最快平均：${b.fastestAvgTime===null?"-":b.fastestAvgTime+"秒"}</div>
+    <div class="modalLine">最快平均：${b.fastestAvgTime===null?"-":b.fastestAvgTime+"秒"}（完成20題）</div>
     <div class="modalLine">遊玩次數：${b.playCount}</div>
   `);
 }
