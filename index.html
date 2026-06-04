@@ -198,9 +198,12 @@ button:disabled{
   color:var(--sub);
   font-size:clamp(12px,2.3vw,19px);
   display:flex;
-  flex-direction:column;
-  align-items:flex-end;
+  flex-direction:row;
+  align-items:center;
+  justify-content:flex-end;
+  gap:6px;
   line-height:1.12;
+  white-space:nowrap;
 }
 
 .battleArea{
@@ -300,13 +303,14 @@ button:disabled{
 
 
 .soundBtn{
-  width:clamp(28px,5vw,42px);
-  height:clamp(24px,4.5vw,36px);
+  width:clamp(24px,4.4vw,36px);
+  height:clamp(22px,4vw,32px);
   padding:0;
-  border-radius:10px;
+  border-radius:9px;
   box-shadow:none;
-  font-size:clamp(15px,3vw,24px);
+  font-size:clamp(14px,2.6vw,21px);
   line-height:1;
+  flex:0 0 auto;
 }
 
 .timeArea{
@@ -967,6 +971,7 @@ equal:"等值判斷",compare:"比較大小",operation:"雙函數運算",judge:"�
 let state=null,timer=null,currentRankSaved=false;
 let soundOn=false;
 let audioCtx=null;
+const MASTER_VOLUME = 2.2;
 
 function rand(a){return a[Math.floor(Math.random()*a.length)]}
 function shuffle(a){let b=[...a];for(let i=b.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]]}return b}
@@ -1294,45 +1299,50 @@ function playTone(freq=440,duration=.08,volume=.035,type="sine",delay=0){
   try{
     initAudio();
     const t=audioCtx.currentTime+delay;
+    const safeVolume=Math.min(volume * MASTER_VOLUME, 0.8);
     const osc=audioCtx.createOscillator();
     const gain=audioCtx.createGain();
     osc.type=type;
     osc.frequency.setValueAtTime(freq,t);
     gain.gain.setValueAtTime(0,t);
-    gain.gain.linearRampToValueAtTime(volume,t+.01);
+    gain.gain.linearRampToValueAtTime(safeVolume,t+.012);
     gain.gain.exponentialRampToValueAtTime(0.0001,t+duration);
     osc.connect(gain);
     gain.connect(audioCtx.destination);
     osc.start(t);
-    osc.stop(t+duration+.02);
+    osc.stop(t+duration+.03);
   }catch(e){}
 }
 
 function playCorrectSound(){
-  playTone(660,.07,.035,"sine",0);
-  playTone(880,.08,.035,"sine",.06);
+  playTone(660,.12,.22,"sine",0);
+  playTone(880,.13,.22,"sine",.09);
 }
 
 function playWrongSound(){
-  playTone(180,.13,.045,"sawtooth",0);
-  playTone(120,.16,.035,"sawtooth",.08);
+  playTone(220,.18,.28,"sawtooth",0);
+  playTone(110,.22,.28,"sawtooth",.12);
 }
 
 function playBossSound(finalClear=false){
   if(finalClear){
-    playTone(523,.10,.045,"triangle",0);
-    playTone(659,.10,.045,"triangle",.08);
-    playTone(784,.14,.05,"triangle",.16);
-    playTone(1046,.18,.05,"triangle",.28);
+    playTone(523,.16,.45,"triangle",0);
+    playTone(659,.16,.45,"triangle",.10);
+    playTone(784,.18,.45,"triangle",.20);
+    playTone(1046,.20,.45,"triangle",.32);
+    playTone(1318,.22,.45,"triangle",.46);
+    playTone(1568,.26,.45,"triangle",.62);
   }else{
-    playTone(392,.08,.045,"triangle",0);
-    playTone(523,.08,.045,"triangle",.07);
-    playTone(784,.12,.05,"triangle",.14);
+    playTone(392,.14,.35,"triangle",0);
+    playTone(523,.14,.35,"triangle",.09);
+    playTone(659,.16,.35,"triangle",.18);
+    playTone(784,.18,.35,"triangle",.30);
+    playTone(1046,.22,.35,"triangle",.44);
   }
 }
 
 function playTickSound(){
-  playTone(900,.035,.018,"square",0);
+  playTone(900,.055,.08,"square",0);
 }
 
 function startGame(){
