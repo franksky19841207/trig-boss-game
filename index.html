@@ -553,13 +553,83 @@ button:disabled{
 
 .resultActions{
   display:grid;
-  grid-template-columns:1fr 1fr 1fr;
+  grid-template-columns:1fr 1fr 1fr 1fr;
   gap:8px;
 }
 
 .actionBtn{
   padding:10px 8px;
   font-size:clamp(15px,3vw,22px);
+  font-weight:900;
+}
+
+
+/* 錯題回顧 */
+#reviewScreen{
+  padding:14px;
+  display:grid;
+  grid-template-rows:auto 1fr auto;
+  gap:10px;
+}
+
+.reviewTitle{
+  font-size:clamp(30px,7vw,54px);
+  color:var(--gold);
+  font-weight:900;
+  text-align:center;
+}
+
+.reviewSub{
+  color:var(--sub);
+  text-align:center;
+  font-size:clamp(14px,2.8vw,20px);
+  margin-top:2px;
+}
+
+.reviewList{
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:16px;
+  padding:12px;
+  overflow-y:auto;
+}
+
+.reviewItem{
+  background:rgba(0,0,0,.2);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:14px;
+  padding:10px;
+  margin-bottom:10px;
+}
+
+.reviewQ{
+  color:var(--gold);
+  font-weight:900;
+  font-size:clamp(16px,3.2vw,24px);
+  margin-bottom:6px;
+}
+
+.reviewText{
+  color:var(--text);
+  font-size:clamp(15px,3vw,22px);
+  line-height:1.35;
+  margin:4px 0;
+}
+
+.reviewWrong{
+  color:var(--red);
+  font-weight:900;
+}
+
+.reviewCorrect{
+  color:var(--green);
+  font-weight:900;
+}
+
+.reviewBackBtn{
+  width:100%;
+  padding:12px 10px;
+  font-size:clamp(18px,3.5vw,26px);
   font-weight:900;
 }
 
@@ -693,9 +763,23 @@ button:disabled{
     <div class="resultActions" style="margin-top:8px;">
       <button class="actionBtn" onclick="saveRank()">儲存</button>
       <button class="actionBtn" onclick="startGame()">再挑戰</button>
+      <button class="actionBtn" onclick="showReview()">錯題</button>
       <button class="actionBtn" onclick="backHome()">首頁</button>
     </div>
   </div>
+</div>
+
+
+<!-- 錯題回顧 -->
+<div id="reviewScreen" class="screen hidden">
+  <div>
+    <div class="reviewTitle">本局錯題回顧</div>
+    <div class="reviewSub" id="reviewSummary">只顯示本次挑戰錯題，重新挑戰後會清空。</div>
+  </div>
+
+  <div class="reviewList" id="reviewList"></div>
+
+  <button class="reviewBackBtn" onclick="backResult()">返回結算</button>
 </div>
 
 </div>
@@ -1030,7 +1114,7 @@ function startGame(){
     heroHp:50,combo:0,maxCombo:0,
     bossIndex:0,bossHp:BOSSES[0].hp,totalDamage:0,correct:0,totalAnswered:0,totalTimeUsed:0,
     fast14:0,maxFast14:0,fast12:0,maxFast12:0,
-    locked:false,timeLeft:15,maxTime:15,finalResult:null,typeResult:{}
+    locked:false,timeLeft:15,maxTime:15,finalResult:null,typeResult:{},wrongQuestions:[]
   };
   Object.keys(TYPE_LABEL).forEach(k=>state.typeResult[k]={correct:0,total:0});
   showScreen("game");
@@ -1039,7 +1123,7 @@ function startGame(){
 }
 
 function showScreen(name){
-  ["homeScreen","gameScreen","resultScreen"].forEach(id=>document.getElementById(id).classList.add("hidden"));
+  ["homeScreen","gameScreen","resultScreen","reviewScreen"].forEach(id=>document.getElementById(id).classList.add("hidden"));
   document.getElementById(name+"Screen").classList.remove("hidden");
 }
 
@@ -1144,6 +1228,14 @@ function answerQuestion(choice){
     state.fast14=0;
     state.fast12=0;
     state.heroHp=Math.max(0,state.heroHp-10);
+
+    state.wrongQuestions.push({
+      number: state.index + 1,
+      type: q.type,
+      question: q.question,
+      yourAnswer: choice >= 0 ? q.options[choice] : "未作答／超時",
+      correctAnswer: q.options[q.answer]
+    });
 
     showFeedback(false,`正確答案：${q.options[q.answer]}`,q.explanation);
     animateBossAttack();
@@ -1415,6 +1507,34 @@ function renderLeaderboard(id){
   if(list.length===0){el.innerHTML=`<div class="line">尚無紀錄</div>`;return}
   el.innerHTML=list.map((r,i)=>`<div class="line">${i+1}. ${r.name}｜${r.title||getTitle(r.killed)}｜${r.killed}/5王｜傷害${r.totalDamage}｜${r.accuracy}%｜C${r.maxCombo}</div>`).join("");
 }
+
+
+function showReview(){
+  if(!state?.finalResult)return;
+  const list=state.wrongQuestions || [];
+  const box=document.getElementById("reviewList");
+  document.getElementById("reviewSummary").textContent=`本局錯題：${list.length} 題`;
+
+  if(list.length===0){
+    box.innerHTML=`<div class="reviewItem"><div class="reviewQ">本次無錯題</div><div class="reviewText">這一場沒有答錯或超時。</div></div>`;
+  }else{
+    box.innerHTML=list.map(item=>`
+      <div class="reviewItem">
+        <div class="reviewQ">Q${item.number}｜${TYPE_LABEL[item.type] || "題目"}</div>
+        <div class="reviewText">題目：${item.question}</div>
+        <div class="reviewText reviewWrong">你的答案：${item.yourAnswer}</div>
+        <div class="reviewText reviewCorrect">正確答案：${item.correctAnswer}</div>
+      </div>
+    `).join("");
+  }
+
+  showScreen("review");
+}
+
+function backResult(){
+  showScreen("result");
+}
+
 
 function backHome(){
   renderHome();
