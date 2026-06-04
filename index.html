@@ -1195,7 +1195,7 @@ function startGame(){
     questions:buildQuestionSet(),index:0,
     heroHp:50,combo:0,maxCombo:0,
     bossIndex:0,bossHp:BOSSES[0].hp,totalDamage:0,correct:0,totalAnswered:0,totalTimeUsed:0,
-    fast14:0,maxFast14:0,fast13:0,maxFast13:0,fast12:0,maxFast12:0,
+    fast13:0,maxFast13:0,fast12:0,maxFast12:0,
     locked:false,timeLeft:15,maxTime:15,finalResult:null,typeResult:{},wrongQuestions:[]
   };
   Object.keys(TYPE_LABEL).forEach(k=>state.typeResult[k]={correct:0,total:0});
@@ -1282,13 +1282,6 @@ function answerQuestion(choice){
     state.combo++;
     state.maxCombo=Math.max(state.maxCombo,state.combo);
 
-    if(state.timeLeft>=14){
-      state.fast14++;
-    }else{
-      state.fast14=0;
-    }
-    state.maxFast14=Math.max(state.maxFast14,state.fast14);
-
     if(state.timeLeft>=13){
       state.fast13++;
     }else{
@@ -1341,7 +1334,6 @@ function answerQuestion(choice){
     buttons[q.answer].classList.add("correct");
 
     state.combo=0;
-    state.fast14=0;
     state.fast13=0;
     state.fast12=0;
     state.heroHp=Math.max(0,state.heroHp-10);
@@ -1546,9 +1538,9 @@ function getAchievementResults(killed,accuracy,avgTime){
     {
       name:"閃電反應",
       icon:"⚡",
-      achieved:state.maxFast13>=5,
-      condition:"連續 5 題於剩餘 13 秒以上答對",
-      current:`本次：${state.maxFast13} / 5`
+      achieved:state.maxFast13>=7,
+      condition:"連續 7 題於剩餘 13 秒以上答對",
+      current:`本次：${state.maxFast13} / 7`
     },
     {
       name:"完美節奏",
