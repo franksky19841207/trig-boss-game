@@ -35,9 +35,16 @@ body{
 }
 
 #app{
-  width:min(100vw,100vh);
-  height:min(100vw,100vh);
-  padding:8px;
+  width:min(94vw,94dvh);
+  height:min(94vw,94dvh);
+  padding:6px;
+}
+
+@supports not (height: 1dvh){
+  #app{
+    width:min(94vw,94vh);
+    height:min(94vw,94vh);
+  }
 }
 
 .screen{
@@ -74,7 +81,6 @@ button:disabled{
   cursor:not-allowed;
 }
 
-/* 首頁 */
 #homeScreen{
   padding:20px;
   display:grid;
@@ -84,7 +90,7 @@ button:disabled{
 }
 
 .gameTitle{
-  font-size:clamp(36px,8vw,62px);
+  font-size:clamp(34px,8vw,62px);
   font-weight:900;
   color:var(--gold);
   text-shadow:0 5px 0 rgba(0,0,0,.45);
@@ -93,7 +99,7 @@ button:disabled{
 
 .subtitle{
   color:var(--sub);
-  font-size:clamp(16px,3.2vw,24px);
+  font-size:clamp(15px,3.2vw,24px);
   line-height:1.45;
   margin-top:8px;
 }
@@ -146,10 +152,9 @@ button:disabled{
   box-shadow:none;
 }
 
-/* 遊戲畫面 1:1 */
 #gameScreen{
   display:grid;
-  grid-template-rows:7% 22% 7% 16% 34% 14%;
+  grid-template-rows:7% 22% 8% 17% 34% 12%;
   gap:5px;
   padding:8px;
 }
@@ -186,21 +191,6 @@ button:disabled{
   align-items:center;
   padding:4px 10px;
   overflow:hidden;
-}
-
-.battleArea.frenzy{
-  box-shadow:inset 0 0 35px rgba(239,71,111,.55);
-  animation:shake .25s infinite alternate;
-}
-
-.battleArea.finalPhase{
-  background:radial-gradient(circle,rgba(155,93,229,.24),rgba(0,0,0,.1)),
-  linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.03));
-}
-
-@keyframes shake{
-  from{transform:translateX(-1px)}
-  to{transform:translateX(1px)}
 }
 
 .fighter{
@@ -259,15 +249,29 @@ button:disabled{
   background:rgba(255,255,255,.055);
   border-radius:12px;
   padding:4px 10px;
-  display:flex;
-  justify-content:space-between;
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
   align-items:center;
+  text-align:center;
   font-size:clamp(12px,2.5vw,20px);
   font-weight:900;
 }
 
 .combo{color:var(--gold)}
-.frenzyText{color:var(--red)}
+.multiplier{color:var(--blue)}
+.timer{
+  color:var(--gold);
+  font-size:clamp(20px,4.5vw,36px);
+}
+.timer.low{
+  color:var(--red);
+  animation:pulse .6s infinite alternate;
+}
+
+@keyframes pulse{
+  from{transform:scale(1)}
+  to{transform:scale(1.08)}
+}
 
 .questionArea{
   background:rgba(255,255,255,.07);
@@ -317,56 +321,18 @@ button:disabled{
   background:linear-gradient(180deg,#ef476f,#a52142);
 }
 
-.bottomBar{
+.bottomInfo{
   background:rgba(255,255,255,.06);
   border-radius:14px;
-  padding:6px 8px;
-  display:grid;
-  grid-template-rows:auto 1fr;
-  gap:5px;
-  min-height:0;
-}
-
-.bottomTop{
-  display:grid;
-  grid-template-columns:1fr auto;
+  padding:6px 10px;
+  display:flex;
+  justify-content:center;
   align-items:center;
-  gap:8px;
-}
-
-.energy{
-  font-size:clamp(12px,2.5vw,19px);
-  color:var(--blue);
+  text-align:center;
+  color:var(--sub);
+  font-size:clamp(13px,2.7vw,21px);
   font-weight:900;
-}
-
-.timer{
-  font-size:clamp(22px,5vw,38px);
-  color:var(--gold);
-  font-weight:900;
-}
-
-.timer.low{
-  color:var(--red);
-  animation:pulse .6s infinite alternate;
-}
-
-@keyframes pulse{
-  from{transform:scale(1)}
-  to{transform:scale(1.08)}
-}
-
-.skillBox{
-  display:grid;
-  grid-template-columns:1fr 1fr 1fr;
-  gap:6px;
-}
-
-.skillBtn{
-  font-size:clamp(12px,2.6vw,20px);
-  font-weight:900;
-  padding:5px 4px;
-  line-height:1.15;
+  line-height:1.25;
 }
 
 .feedback{
@@ -432,7 +398,6 @@ button:disabled{
   100%{transform:translateX(0) scale(1)}
 }
 
-/* Boss登場 */
 #bossIntro{
   position:absolute;
   inset:0;
@@ -484,7 +449,6 @@ button:disabled{
   font-size:clamp(20px,4vw,32px);
 }
 
-/* 結算 */
 #resultScreen{
   padding:14px;
   display:grid;
@@ -579,7 +543,6 @@ button:disabled{
 <body>
 <div id="app">
 
-<!-- 首頁 -->
 <div id="homeScreen" class="screen">
   <div>
     <div class="gameTitle">三角函數魔王塔</div>
@@ -606,7 +569,6 @@ button:disabled{
   <div class="line" style="text-align:center;">建議使用大屏或手機直式畫面</div>
 </div>
 
-<!-- 遊戲 -->
 <div id="gameScreen" class="screen hidden">
 
   <div class="topBar">
@@ -635,7 +597,8 @@ button:disabled{
 
   <div class="statusLine">
     <div class="combo" id="comboText">Combo x0</div>
-    <div id="frenzyText"></div>
+    <div class="multiplier" id="multiplierText">倍率 x1.0</div>
+    <div class="timer" id="timerText">15秒</div>
   </div>
 
   <div class="questionArea">
@@ -644,17 +607,8 @@ button:disabled{
 
   <div class="options" id="options"></div>
 
-  <div class="bottomBar">
-    <div class="bottomTop">
-      <div class="energy" id="energyText">能量 ○○○○○○○</div>
-      <div class="timer" id="timerText">15秒</div>
-    </div>
-
-    <div class="skillBox">
-      <button class="skillBtn" id="eyeBtn" onclick="useEye()">👁 單位圓<br><small>3</small></button>
-      <button class="skillBtn" id="timeBtn" onclick="useTimeFreeze()">⏱ 時停<br><small>5</small></button>
-      <button class="skillBtn" id="critBtn" onclick="useCrit()">⚔ 暴擊<br><small>7</small></button>
-    </div>
+  <div class="bottomInfo" id="bottomInfo">
+    答得越快、Combo越高，攻擊越強。
   </div>
 
   <div id="bossIntro" class="hidden">
@@ -669,7 +623,6 @@ button:disabled{
   <div id="feedback" class="feedback hidden"></div>
 </div>
 
-<!-- 結算 -->
 <div id="resultScreen" class="screen hidden">
   <div>
     <div class="resultTitle">挑戰結束</div>
@@ -709,11 +662,11 @@ button:disabled{
 
 <script>
 const BOSSES=[
-  {name:"角度史萊姆王",hp:500,icon:"👾"},
-  {name:"象限狼人王",hp:650,icon:"🐺"},
-  {name:"單位圓巨人",hp:800,icon:"🧊"},
-  {name:"函數黑龍",hp:950,icon:"🐉"},
-  {name:"三角魔神",hp:1100,icon:"😈"}
+  {name:"角度史萊姆王",hp:450,icon:"👾"},
+  {name:"象限狼人王",hp:600,icon:"🐺"},
+  {name:"單位圓巨人",hp:750,icon:"🧊"},
+  {name:"函數黑龍",hp:900,icon:"🐉"},
+  {name:"三角魔神",hp:1000,icon:"😈"}
 ];
 
 const ANGLES=[0,30,45,60,90,120,135,150,180,210,225,240,270,300,315,330,360];
@@ -727,9 +680,16 @@ tan:{0:["0",0],30:["√3/3",.577],45:["1",1],60:["√3",1.732],90:["無定義",n
 };
 
 const VALUE_POOL=["-√3","-1","-√3/2","-√2/2","-1/2","-√3/3","0","√3/3","1/2","√2/2","√3/2","1","√3","無定義","3/2","-3/2","√2","-√2"];
+
 const TYPE_LABEL={
-special:"特殊角值",sign:"象限正負",variation:"函數變化",transform:"轉換公式",
-equal:"等值判斷",compare:"比較大小",operation:"雙函數運算",judge:"綜合判斷"
+special:"特殊角值",
+sign:"象限正負",
+variation:"函數變化",
+transform:"轉換公式",
+equal:"等值判斷",
+compare:"比較大小",
+operation:"雙函數運算",
+judge:"綜合判斷"
 };
 
 let state=null,timer=null,currentRankSaved=false;
@@ -746,7 +706,7 @@ function makeMCQ(question,correct,distractors,meta={}){
     if(!options.includes(item)&&item!==correct)options.push(item);
   }
   options=shuffle(options.slice(0,4));
-  return {...meta,question,options,answer:options.indexOf(correct)};
+  return {...meta,question,options,answer:options.indexOf(correct),key:question};
 }
 
 function signText(func,angle){
@@ -784,7 +744,6 @@ function generateSign(target=null){
   });
 }
 
-/* 新C題型：函數變化與比較，不再使用 sin×cos 遞增遞減 */
 const VARIATION_TEMPLATES=[
 ["第一象限中，若 θ 增加，sinθ 會？","變大",["變小","不變","無法判斷"],"第一象限中 sinθ 遞增，所以會變大。"],
 ["第二象限中，若 θ 增加，sinθ 會？","變小",["變大","不變","無法判斷"],"第二象限中 sinθ 遞減，所以會變小。"],
@@ -816,21 +775,18 @@ const TRANSFORMS=[
 ["90","cos(90° + θ) = ?","-sinθ","90°+θ 時，cos 轉為 sin，且為負。"],
 ["90","tan(90° − θ) = ?","1/tanθ","90°−θ 時，tan 轉為 1/tanθ，且為正。"],
 ["90","tan(90° + θ) = ?","-1/tanθ","90°+θ 時，tan 轉為 1/tanθ，且為負。"],
-
 ["180","sin(180° − θ) = ?","sinθ","180°−θ 時，sin 不變函數，且為正。"],
 ["180","sin(180° + θ) = ?","-sinθ","180°+θ 時，sin 不變函數，且為負。"],
 ["180","cos(180° − θ) = ?","-cosθ","180°−θ 時，cos 不變函數，且為負。"],
 ["180","cos(180° + θ) = ?","-cosθ","180°+θ 時，cos 不變函數，且為負。"],
 ["180","tan(180° − θ) = ?","-tanθ","180°−θ 時，tan 不變函數，且為負。"],
 ["180","tan(180° + θ) = ?","tanθ","180°+θ 時，tan 不變函數，且為正。"],
-
 ["270","sin(270° − θ) = ?","-cosθ","270°−θ 時，sin 轉為 cos，且為負。"],
 ["270","sin(270° + θ) = ?","-cosθ","270°+θ 時，sin 轉為 cos，且為負。"],
 ["270","cos(270° − θ) = ?","-sinθ","270°−θ 時，cos 轉為 sin，且為負。"],
 ["270","cos(270° + θ) = ?","sinθ","270°+θ 時，cos 轉為 sin，且為正。"],
 ["270","tan(270° − θ) = ?","1/tanθ","270°−θ 時，tan 轉為 1/tanθ，且為正。"],
 ["270","tan(270° + θ) = ?","-1/tanθ","270°+θ 時，tan 轉為 1/tanθ，且為負。"],
-
 ["360","sin(360° − θ) = ?","-sinθ","360°−θ 時，sin 不變函數，且為負。"],
 ["360","sin(360° + θ) = ?","sinθ","360°+θ 時，sin 不變函數，且為正。"],
 ["360","cos(360° − θ) = ?","cosθ","360°−θ 時，cos 不變函數，且為正。"],
@@ -852,7 +808,7 @@ function allFiniteTerms(){
   for(const f of["sin","cos","tan"]){
     for(const a of ANGLES){
       const [s,v]=TRIG[f][a];
-      if(v!==null)terms.push({label:`${f}${a}°`,value:v,key:s});
+      if(v!==null)terms.push({label:`${f}${a}°`,value:v,key:s,angle:a});
     }
   }
   return terms;
@@ -868,7 +824,7 @@ function generateEqual(){
   }
   const wrongs=shuffle(terms.filter(t=>t.key!==target.key)).slice(0,8).map(t=>t.label);
   return makeMCQ(`下列何者與 ${target.label} 相等？`,correct.label,wrongs,{
-    type:"equal",explanation:`${target.label} = ${target.key}，${correct.label} 也等於 ${target.key}。`
+    type:"equal",angle:target.angle,explanation:`${target.label} = ${target.key}，${correct.label} 也等於 ${target.key}。`
   });
 }
 
@@ -882,7 +838,7 @@ function generateCompare(){
   const mode=Math.random()<.5?"最大":"最小";
   const correct=picked.reduce((b,c)=>mode==="最大"?(c.value>b.value?c:b):(c.value<b.value?c:b),picked[0]);
   return makeMCQ(`下列何者${mode}？`,correct.label,picked.map(t=>t.label).filter(x=>x!==correct.label),{
-    type:"compare",explanation:`比較四個三角值後，${correct.label} 為${mode}。`
+    type:"compare",angle:correct.angle,explanation:`比較四個三角值後，${correct.label} 為${mode}。`
   });
 }
 
@@ -925,45 +881,115 @@ function has3Same(arr){
   return false;
 }
 
+function hasDuplicateQuestion(arr){
+  const keys=arr.map(q=>q.key);
+  return unique(keys).length!==keys.length;
+}
+
+function violatesAngleCooldown(arr){
+  for(let i=0;i<arr.length;i++){
+    if(arr[i].angle===undefined)return false;
+    for(let j=i+1;j<=i+2&&j<arr.length;j++){
+      if(arr[j].angle!==undefined&&arr[i].angle===arr[j].angle)return true;
+    }
+  }
+  return false;
+}
+
 function buildQuestionSet(){
-  let base=[
+  for(let attempt=0;attempt<300;attempt++){
+    let base=[
+      generateSpecial(rand(AXIS)),
+      generateSpecial(rand([...Q1,...Q2])),
+      generateSpecial(rand([...Q3,...Q4])),
+      generateSpecial(rand(ANGLES)),
+
+      generateSign("正"),
+      generateSign("負"),
+      generateSign("0"),
+      generateSign("無定義"),
+
+      generateVariation(),
+      generateVariation(),
+      generateVariation(),
+      generateVariation(),
+
+      generateTransform("90"),
+      generateTransform("180"),
+      generateTransform("270"),
+      generateTransform("360")
+    ];
+
+    base=shuffle(base);
+
+    const full=[
+      ...base,
+      generateEqual(),
+      generateCompare(),
+      generateOperation(),
+      generateJudge()
+    ];
+
+    if(!has3Same(full)&&!hasDuplicateQuestion(full)&&!violatesAngleCooldown(full)){
+      return full;
+    }
+  }
+
+  let fallback=[
     generateSpecial(rand(AXIS)),
     generateSpecial(rand([...Q1,...Q2])),
     generateSpecial(rand([...Q3,...Q4])),
     generateSpecial(rand(ANGLES)),
-
     generateSign("正"),
     generateSign("負"),
     generateSign("0"),
     generateSign("無定義"),
-
     generateVariation(),
     generateVariation(),
     generateVariation(),
     generateVariation(),
-
     generateTransform("90"),
     generateTransform("180"),
     generateTransform("270"),
-    generateTransform("360")
+    generateTransform("360"),
+    generateEqual(),
+    generateCompare(),
+    generateOperation(),
+    generateJudge()
   ];
 
-  for(let i=0;i<100;i++){
-    const s=shuffle(base);
-    if(!has3Same(s)){base=s;break}
-  }
+  return shuffle(fallback.slice(0,16)).concat(fallback.slice(16));
+}
 
-  return [...base,generateEqual(),generateCompare(),generateOperation(),generateJudge()];
+function comboRate(){
+  const c=state.combo;
+  if(c>=12)return 1.8;
+  if(c>=8)return 1.6;
+  if(c>=5)return 1.4;
+  if(c>=3)return 1.2;
+  return 1;
 }
 
 function startGame(){
   clearInterval(timer);
   currentRankSaved=false;
   state={
-    questions:buildQuestionSet(),index:0,
-    heroHp:50,energy:0,combo:0,maxCombo:0,frenzy:0,crit:false,eyeUsed:false,
-    bossIndex:0,bossHp:BOSSES[0].hp,totalDamage:0,correct:0,totalAnswered:0,totalTimeUsed:0,
-    locked:false,timeLeft:15,maxTime:15,finalResult:null,typeResult:{}
+    questions:buildQuestionSet(),
+    index:0,
+    heroHp:50,
+    combo:0,
+    maxCombo:0,
+    bossIndex:0,
+    bossHp:BOSSES[0].hp,
+    totalDamage:0,
+    correct:0,
+    totalAnswered:0,
+    totalTimeUsed:0,
+    locked:false,
+    timeLeft:15,
+    maxTime:15,
+    finalResult:null,
+    typeResult:{}
   };
   Object.keys(TYPE_LABEL).forEach(k=>state.typeResult[k]={correct:0,total:0});
   showScreen("game");
@@ -990,15 +1016,17 @@ function showBossIntro(){
 function renderQuestion(){
   clearInterval(timer);
   state.locked=false;
-  state.eyeUsed=false;
   state.maxTime=15;
   state.timeLeft=15;
 
-  if(state.index>=state.questions.length){finishGame();return}
+  if(state.index>=state.questions.length){
+    finishGame();
+    return;
+  }
 
   const q=state.questions[state.index];
   document.getElementById("questionCount").textContent=`Q${state.index+1} / 20`;
-  document.getElementById("phaseText").textContent=state.index>=16?"⚔ 魔神決戰":"基礎混合題";
+  document.getElementById("phaseText").textContent=state.index>=16?"Boss Challenge":"基礎混合題";
   document.getElementById("questionText").textContent=q.question;
 
   const box=document.getElementById("options");
@@ -1020,7 +1048,10 @@ function startTimer(){
   timer=setInterval(()=>{
     state.timeLeft--;
     updateTimer();
-    if(state.timeLeft<=0){clearInterval(timer);answerQuestion(-1)}
+    if(state.timeLeft<=0){
+      clearInterval(timer);
+      answerQuestion(-1);
+    }
   },1000);
 }
 
@@ -1049,30 +1080,29 @@ function answerQuestion(choice){
     state.typeResult[q.type].correct++;
     state.combo++;
     state.maxCombo=Math.max(state.maxCombo,state.combo);
-    state.energy=Math.min(7,state.energy+1);
-
-    if(state.combo>=5&&state.heroHp>0){
-      if(state.frenzy<=0)state.frenzy=3;
-      else state.frenzy=Math.min(3,state.frenzy+1);
-    }
 
     const dmg=calculateDamage();
     applyDamage(dmg);
     showFeedback(true,`造成 ${dmg} 傷害`,"");
     animateHeroAttack(dmg);
 
-    if(state.frenzy>0)state.frenzy--;
     setTimeout(nextQuestion,520);
   }else{
     if(choice>=0&&buttons[choice])buttons[choice].classList.add("wrong");
     buttons[q.answer].classList.add("correct");
 
     state.combo=0;
-    state.frenzy=0;
     state.heroHp=Math.max(0,state.heroHp-10);
 
     showFeedback(false,`正確答案：${q.options[q.answer]}`,q.explanation);
     animateBossAttack();
+
+    if(state.heroHp<=0){
+      setTimeout(finishGame,1100);
+      updateUI();
+      return;
+    }
+
     setTimeout(nextQuestion,1050);
   }
 
@@ -1080,7 +1110,6 @@ function answerQuestion(choice){
 }
 
 function nextQuestion(){
-  state.crit=false;
   state.index++;
   renderQuestion();
 }
@@ -1092,22 +1121,13 @@ function calculateDamage(){
   else if(state.timeLeft>=6)base=70;
   else if(state.timeLeft>=3)base=50;
 
-  let comboRate=1;
-  if(state.combo>=12)comboRate=1.8;
-  else if(state.combo>=8)comboRate=1.6;
-  else if(state.combo>=5)comboRate=1.4;
-  else if(state.combo>=3)comboRate=1.2;
-
-  const frenzyRate=state.frenzy>0&&state.heroHp>0?1.5:1;
-  const finalRate=state.index>=16?1.5:1;
-  const critRate=state.crit?3:1;
-
-  return Math.min(500,Math.round(base*comboRate*frenzyRate*finalRate*critRate));
+  return Math.min(500,Math.round(base*comboRate()));
 }
 
 function applyDamage(amount){
   state.totalDamage+=amount;
   let dmg=amount;
+
   while(dmg>0&&state.bossIndex<BOSSES.length){
     if(dmg>=state.bossHp){
       dmg-=state.bossHp;
@@ -1125,10 +1145,6 @@ function applyDamage(amount){
 }
 
 function updateUI(){
-  const battle=document.getElementById("battleArea");
-  battle.classList.toggle("frenzy",state.frenzy>0&&state.heroHp>0);
-  battle.classList.toggle("finalPhase",state.index>=16);
-
   const heroPercent=state.heroHp/50*100;
   document.getElementById("heroHpText").textContent=`HP ${state.heroHp} / 50`;
   document.getElementById("heroHpBar").style.width=`${heroPercent}%`;
@@ -1147,45 +1163,8 @@ function updateUI(){
   }
 
   document.getElementById("comboText").textContent=`Combo x${state.combo}`;
-  document.getElementById("frenzyText").textContent=state.frenzy>0&&state.heroHp>0?`🔥 狂暴 ${state.frenzy}`:(state.heroHp===0?"HP歸零：無狂暴":"");
-  document.getElementById("energyText").textContent="能量 "+"●".repeat(state.energy)+"○".repeat(7-state.energy);
-
-  document.getElementById("eyeBtn").disabled=state.energy<3||state.eyeUsed||state.locked;
-  document.getElementById("timeBtn").disabled=state.energy<5||state.locked;
-  document.getElementById("critBtn").disabled=state.energy<7||state.crit||state.locked;
-}
-
-function useEye(){
-  if(state.energy<3||state.eyeUsed||state.locked)return;
-  state.energy-=3;
-  state.eyeUsed=true;
-  const q=state.questions[state.index];
-  const wrong=[0,1,2,3].filter(i=>i!==q.answer);
-  const remove=shuffle(wrong).slice(0,2);
-  const buttons=[...document.querySelectorAll(".optionBtn")];
-  remove.forEach(i=>{
-    buttons[i].disabled=true;
-    buttons[i].style.visibility="hidden";
-  });
-  updateUI();
-}
-
-function useTimeFreeze(){
-  if(state.energy<5||state.locked)return;
-  state.energy-=5;
-  state.maxTime=25;
-  state.timeLeft=Math.min(25,state.timeLeft+10);
-  updateTimer();
-  updateUI();
-}
-
-function useCrit(){
-  if(state.energy<7||state.crit||state.locked)return;
-  state.energy-=7;
-  state.crit=true;
-  showFeedback(true,"暴擊斬準備完成","本題答對時，傷害 ×3。");
-  setTimeout(()=>document.getElementById("feedback").classList.add("hidden"),500);
-  updateUI();
+  document.getElementById("multiplierText").textContent=`倍率 x${comboRate().toFixed(1)}`;
+  document.getElementById("bottomInfo").textContent=`目前規則：基礎傷害 × Combo倍率。答錯 Combo 歸零，HP -10。`;
 }
 
 function showFeedback(good,big,explain){
@@ -1219,7 +1198,16 @@ function finishGame(){
   const avg=state.totalAnswered?(state.totalTimeUsed/state.totalAnswered).toFixed(1):"0.0";
   const title=getTitle(killed,accuracy,state.maxCombo);
 
-  state.finalResult={killed,totalDamage:state.totalDamage,accuracy,avgTime:Number(avg),maxCombo:state.maxCombo,hp:state.heroHp,title,date:new Date().toLocaleDateString()};
+  state.finalResult={
+    killed,
+    totalDamage:state.totalDamage,
+    accuracy,
+    avgTime:Number(avg),
+    maxCombo:state.maxCombo,
+    hp:state.heroHp,
+    title,
+    date:new Date().toLocaleDateString()
+  };
 
   document.getElementById("rBoss").textContent=`${killed} / 5`;
   document.getElementById("rDamage").textContent=state.totalDamage;
@@ -1255,22 +1243,43 @@ function getTitle(killed,acc,combo){
   return"三角村村民";
 }
 
-function storageGet(k,f){try{return JSON.parse(localStorage.getItem(k))??f}catch{return f}}
-function storageSet(k,v){localStorage.setItem(k,JSON.stringify(v))}
+function storageGet(k,f){
+  try{return JSON.parse(localStorage.getItem(k))??f}
+  catch{return f}
+}
+
+function storageSet(k,v){
+  localStorage.setItem(k,JSON.stringify(v));
+}
 
 function unlockBoss(i){
   const u=storageGet("trigBossUnlocked",[]);
-  if(!u.includes(i)){u.push(i);storageSet("trigBossUnlocked",u)}
+  if(!u.includes(i)){
+    u.push(i);
+    storageSet("trigBossUnlocked",u);
+  }
 }
 
 function updateBestRecords(r){
-  const b=storageGet("trigBossBest",{highestBoss:0,highestCombo:0,highestAccuracy:0,fastestAvgTime:null,highestDamage:0,playCount:0});
+  const b=storageGet("trigBossBest",{
+    highestBoss:0,
+    highestCombo:0,
+    highestAccuracy:0,
+    fastestAvgTime:null,
+    highestDamage:0,
+    playCount:0
+  });
+
   b.highestBoss=Math.max(b.highestBoss,r.killed);
   b.highestCombo=Math.max(b.highestCombo,r.maxCombo);
   b.highestAccuracy=Math.max(b.highestAccuracy,r.accuracy);
   b.highestDamage=Math.max(b.highestDamage,r.totalDamage);
   b.playCount++;
-  if(r.avgTime>0&&(b.fastestAvgTime===null||r.avgTime<b.fastestAvgTime))b.fastestAvgTime=r.avgTime;
+
+  if(r.avgTime>0&&(b.fastestAvgTime===null||r.avgTime<b.fastestAvgTime)){
+    b.fastestAvgTime=r.avgTime;
+  }
+
   storageSet("trigBossBest",b);
 }
 
@@ -1279,7 +1288,14 @@ function saveRank(){
   const name=document.getElementById("playerName").value.trim()||"無名勇者";
   const list=storageGet("trigBossRanks",[]);
   list.push({name,...state.finalResult});
-  list.sort((a,b)=>b.killed-a.killed||b.totalDamage-a.totalDamage||b.accuracy-a.accuracy||a.avgTime-b.avgTime);
+
+  list.sort((a,b)=>
+    b.killed-a.killed||
+    b.totalDamage-a.totalDamage||
+    b.accuracy-a.accuracy||
+    a.avgTime-b.avgTime
+  );
+
   storageSet("trigBossRanks",list.slice(0,10));
   currentRankSaved=true;
   renderLeaderboard("resultLeaderboard");
@@ -1287,7 +1303,15 @@ function saveRank(){
 }
 
 function renderHome(){
-  const b=storageGet("trigBossBest",{highestBoss:0,highestCombo:0,highestAccuracy:0,fastestAvgTime:null,highestDamage:0,playCount:0});
+  const b=storageGet("trigBossBest",{
+    highestBoss:0,
+    highestCombo:0,
+    highestAccuracy:0,
+    fastestAvgTime:null,
+    highestDamage:0,
+    playCount:0
+  });
+
   document.getElementById("bestRecords").innerHTML=`
     <div class="line">最高擊殺：${b.highestBoss} / 5 王</div>
     <div class="line">最高傷害：${b.highestDamage}</div>
@@ -1298,7 +1322,10 @@ function renderHome(){
   `;
 
   const u=storageGet("trigBossUnlocked",[]);
-  document.getElementById("bossCollection").innerHTML=BOSSES.map((x,i)=>`<div class="line">${u.includes(i)?"✓":"□"} ${x.icon} ${x.name}</div>`).join("");
+  document.getElementById("bossCollection").innerHTML=BOSSES.map((x,i)=>`
+    <div class="line">${u.includes(i)?"✓":"□"} ${x.icon} ${x.name}</div>
+  `).join("");
+
   renderLeaderboard("homeLeaderboard");
 }
 
@@ -1306,8 +1333,15 @@ function renderLeaderboard(id){
   const list=storageGet("trigBossRanks",[]);
   const el=document.getElementById(id);
   if(!el)return;
-  if(list.length===0){el.innerHTML=`<div class="line">尚無紀錄</div>`;return}
-  el.innerHTML=list.map((r,i)=>`<div class="line">${i+1}. ${r.name}｜${r.killed}/5王｜傷害${r.totalDamage}｜${r.accuracy}%｜C${r.maxCombo}</div>`).join("");
+
+  if(list.length===0){
+    el.innerHTML=`<div class="line">尚無紀錄</div>`;
+    return;
+  }
+
+  el.innerHTML=list.map((r,i)=>`
+    <div class="line">${i+1}. ${r.name}｜${r.killed}/5王｜傷害${r.totalDamage}｜${r.accuracy}%｜C${r.maxCombo}</div>
+  `).join("");
 }
 
 function backHome(){
