@@ -160,7 +160,7 @@ button:disabled{
 /* 遊戲畫面 1:1 */
 #gameScreen{
   display:grid;
-  grid-template-rows:7% 22% 8% 18% 45%;
+  grid-template-rows:8% 28% 19% 45%;
   gap:5px;
   padding:8px;
 }
@@ -172,6 +172,7 @@ button:disabled{
   display:grid;
   grid-template-columns:1fr auto 1fr;
   align-items:center;
+  gap:6px;
   font-weight:900;
   font-size:clamp(13px,2.5vw,21px);
 }
@@ -179,12 +180,27 @@ button:disabled{
 .topCenter{
   color:var(--gold);
   font-size:clamp(15px,3vw,24px);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  line-height:1.05;
+}
+
+.phaseSmall{
+  color:var(--sub);
+  font-size:clamp(9px,1.9vw,14px);
+  font-weight:800;
+  margin-top:2px;
 }
 
 .topRight{
   text-align:right;
   color:var(--sub);
   font-size:clamp(12px,2.3vw,19px);
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  line-height:1.12;
 }
 
 .battleArea{
@@ -268,7 +284,8 @@ button:disabled{
 .multiplier{color:var(--blue)}
 .timer{
   color:var(--gold);
-  font-size:clamp(18px,4vw,30px);
+  font-size:clamp(15px,3.2vw,24px);
+  font-weight:900;
 }
 
 .timer.low{
@@ -584,9 +601,15 @@ button:disabled{
 <div id="gameScreen" class="screen hidden">
 
   <div class="topBar">
-    <div>三角函數魔王塔</div>
-    <div class="topCenter" id="questionCount">Q1 / 20</div>
-    <div class="topRight" id="phaseText">基礎混合題</div>
+    <div class="combo" id="comboText">Combo x0</div>
+    <div class="topCenter">
+      <span id="questionCount">Q1 / 20</span>
+      <span class="phaseSmall" id="phaseText">基礎混合題</span>
+    </div>
+    <div class="topRight">
+      <span class="multiplier" id="multiplierText">倍率 ×1.0</span>
+      <span class="timer" id="timerText">15秒</span>
+    </div>
   </div>
 
   <div class="battleArea" id="battleArea">
@@ -607,11 +630,6 @@ button:disabled{
     </div>
   </div>
 
-  <div class="statusLine">
-    <div class="combo" id="comboText">Combo x0</div>
-    <div class="multiplier" id="multiplierText">倍率 ×1.0</div>
-    <div class="timer" id="timerText">15秒</div>
-  </div>
 
   <div class="questionArea">
     <div class="questionText" id="questionText">題目</div>
