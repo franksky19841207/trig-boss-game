@@ -1318,16 +1318,23 @@ function answerQuestion(choice){
       correctAnswer: q.options[q.answer]
     });
 
-    showFeedback(false,`正確答案：${q.options[q.answer]}`,q.explanation);
+    showFeedback(false,`正確答案：${q.options[q.answer]}`,q.explanation,true);
     animateBossAttack();
     updateUI();
 
-    if(state.heroHp<=0){
-      setTimeout(finishGame,1100);
-      return;
-    }
+    const shouldFinish = state.heroHp <= 0;
+    const fb = document.getElementById("feedback");
+    fb.onclick = () => {
+      fb.classList.add("hidden");
+      fb.onclick = null;
+      if(shouldFinish){
+        finishGame();
+      }else{
+        nextQuestion();
+      }
+    };
 
-    setTimeout(nextQuestion,1050);
+    return;
   }
 
   updateUI();
@@ -1397,12 +1404,18 @@ function updateUI(){
   document.getElementById("multiplierText").textContent=`倍率 ×${comboRate().toFixed(1)}`;
 }
 
-function showFeedback(good,big,explain){
+function showFeedback(good,big,explain,hold=false){
   const fb=document.getElementById("feedback");
+  fb.onclick=null;
   fb.className="feedback "+(good?"good":"bad");
-  fb.innerHTML=`<div class="big">${good?"✓":"✗"} ${big}</div><div class="explain">${explain||""}</div>`;
+
+  const hint = hold ? `<div class="explain" style="margin-top:10px;color:var(--gold);font-weight:900;">點一下繼續</div>` : "";
+  fb.innerHTML=`<div class="big">${good?"✓":"✗"} ${big}</div><div class="explain">${explain||""}</div>${hint}`;
   fb.classList.remove("hidden");
-  setTimeout(()=>fb.classList.add("hidden"),good?500:1000);
+
+  if(!hold){
+    setTimeout(()=>fb.classList.add("hidden"),good?500:1000);
+  }
 }
 
 function animateHeroAttack(dmg){
