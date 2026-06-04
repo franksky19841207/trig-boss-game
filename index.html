@@ -633,6 +633,70 @@ button:disabled{
   font-weight:900;
 }
 
+
+/* 共用資訊彈窗 */
+#infoModal{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,.78);
+  z-index:60;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  backdrop-filter:blur(3px);
+}
+
+.modalCard{
+  width:88%;
+  height:78%;
+  background:linear-gradient(160deg,rgba(32,36,58,.98),rgba(14,16,28,.98));
+  border:2px solid rgba(255,255,255,.18);
+  border-radius:22px;
+  box-shadow:0 20px 70px rgba(0,0,0,.6);
+  display:grid;
+  grid-template-rows:auto 1fr auto;
+  gap:10px;
+  padding:14px;
+}
+
+.modalTitle{
+  color:var(--gold);
+  font-size:clamp(26px,6vw,46px);
+  font-weight:900;
+  text-align:center;
+}
+
+.modalContent{
+  background:rgba(0,0,0,.18);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:16px;
+  padding:12px;
+  overflow-y:auto;
+}
+
+.modalContent .line,
+.modalContent .typeStat{
+  font-size:clamp(16px,3.2vw,24px);
+  margin:8px 0;
+}
+
+.modalCloseBtn{
+  width:100%;
+  padding:12px 10px;
+  font-size:clamp(18px,3.5vw,28px);
+  font-weight:900;
+}
+
+.clickablePanelTitle{
+  cursor:pointer;
+}
+
+.clickHint{
+  color:var(--gold);
+  font-size:.75em;
+  margin-left:6px;
+}
+
 @media (max-width:500px){
   #app{padding:4px}
   .screen{border-radius:14px}
@@ -656,16 +720,16 @@ button:disabled{
 
   <div class="homePanels">
     <div class="panel">
-      <div class="panelTitle">最高紀錄</div>
+      <div class="panelTitle clickablePanelTitle" onclick="openModalFromElement('最高紀錄', 'bestRecords')">最高紀錄 <span class="clickHint">點開</span></div>
       <div id="bestRecords"></div>
       <button class="smallBtn" onclick="resetData()">清除本機紀錄</button>
     </div>
 
     <div class="panel">
-      <div class="panelTitle">Boss Collection</div>
+      <div class="panelTitle clickablePanelTitle" onclick="openModalFromElement('Boss Collection', 'bossCollection')">Boss Collection <span class="clickHint">點開</span></div>
       <div id="bossCollection"></div>
       <hr style="border-color:rgba(255,255,255,.12)">
-      <div class="panelTitle">排行榜 Top 10</div>
+      <div class="panelTitle clickablePanelTitle" onclick="openModalFromElement('排行榜 Top 10', 'homeLeaderboard')">排行榜 Top 10 <span class="clickHint">點開</span></div>
       <div id="homeLeaderboard"></div>
     </div>
   </div>
@@ -744,16 +808,16 @@ button:disabled{
     </div>
 
     <div class="resultCard">
-      <div class="panelTitle">本次達成成就</div>
+      <div class="panelTitle clickablePanelTitle" onclick="openModalFromElement('本次達成成就', 'achievedList')">本次達成成就 <span class="clickHint">點開</span></div>
       <div id="achievedList"></div>
       <hr style="border-color:rgba(255,255,255,.12)">
-      <div class="panelTitle">差一點達成</div>
+      <div class="panelTitle clickablePanelTitle" onclick="openModalFromElement('差一點達成', 'missedList')">差一點達成 <span class="clickHint">點開</span></div>
       <div id="missedList"></div>
       <hr style="border-color:rgba(255,255,255,.12)">
-      <div class="panelTitle">題型表現</div>
+      <div class="panelTitle clickablePanelTitle" onclick="openModalFromElement('題型表現', 'typeStats')">題型表現 <span class="clickHint">點開</span></div>
       <div id="typeStats"></div>
       <hr style="border-color:rgba(255,255,255,.12)">
-      <div class="panelTitle">排行榜</div>
+      <div class="panelTitle clickablePanelTitle" onclick="openModalFromElement('排行榜', 'resultLeaderboard')">排行榜 <span class="clickHint">點開</span></div>
       <div id="resultLeaderboard"></div>
     </div>
   </div>
@@ -780,6 +844,16 @@ button:disabled{
   <div class="reviewList" id="reviewList"></div>
 
   <button class="reviewBackBtn" onclick="backResult()">返回結算</button>
+</div>
+
+
+<!-- 共用資訊彈窗 -->
+<div id="infoModal" class="hidden">
+  <div class="modalCard">
+    <div class="modalTitle" id="modalTitle">資訊</div>
+    <div class="modalContent" id="modalContent"></div>
+    <button class="modalCloseBtn" onclick="closeModal()">關閉</button>
+  </div>
 </div>
 
 </div>
@@ -1509,6 +1583,25 @@ function renderLeaderboard(id){
 }
 
 
+
+function openModal(title, html){
+  document.getElementById("modalTitle").textContent=title;
+  document.getElementById("modalContent").innerHTML=html && html.trim()
+    ? html
+    : `<div class="line">目前沒有資料</div>`;
+  document.getElementById("infoModal").classList.remove("hidden");
+}
+
+function openModalFromElement(title, elementId){
+  const el=document.getElementById(elementId);
+  openModal(title, el ? el.innerHTML : `<div class="line">目前沒有資料</div>`);
+}
+
+function closeModal(){
+  document.getElementById("infoModal").classList.add("hidden");
+}
+
+
 function showReview(){
   if(!state?.finalResult)return;
   const list=state.wrongQuestions || [];
@@ -1542,12 +1635,16 @@ function backHome(){
 }
 
 function resetData(){
-  if(!confirm("確定要清除本機紀錄嗎？"))return;
+  if(!confirm("確定要清除本機紀錄、排行榜與Boss圖鑑嗎？"))return;
   localStorage.removeItem("trigBossBest");
   localStorage.removeItem("trigBossRanks");
   localStorage.removeItem("trigBossUnlocked");
   renderHome();
 }
+
+document.getElementById("infoModal").addEventListener("click",function(e){
+  if(e.target.id==="infoModal")closeModal();
+});
 
 renderHome();
 </script>
