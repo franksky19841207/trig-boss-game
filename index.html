@@ -1,0 +1,1628 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>三角函數魔王塔</title>
+  <style>
+    :root {
+      --bg: #12131f;
+      --panel: #1e2133;
+      --panel2: #292d45;
+      --text: #f7f7ff;
+      --sub: #c7c9d9;
+      --accent: #ffd166;
+      --danger: #ef476f;
+      --good: #06d6a0;
+      --blue: #4cc9f0;
+      --purple: #9b5de5;
+      --disabled: #55586a;
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+    }
+
+    body {
+      margin: 0;
+      background: radial-gradient(circle at top, #303652 0%, #12131f 55%, #090a12 100%);
+      color: var(--text);
+      font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: auto;
+    }
+
+    #app {
+      width: min(100vw, 100vh);
+      height: min(100vw, 100vh);
+      padding: 8px;
+    }
+
+    .screen {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(160deg, rgba(30, 33, 51, 0.96), rgba(15, 17, 30, 0.98));
+      border: 3px solid rgba(255,255,255,0.12);
+      border-radius: 22px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    button {
+      font-family: inherit;
+      cursor: pointer;
+      border: none;
+      border-radius: 12px;
+      color: var(--text);
+      background: linear-gradient(180deg, #3b4165, #242842);
+      box-shadow: 0 4px 0 #151829;
+      transition: transform 0.08s, filter 0.12s, opacity 0.12s;
+    }
+
+    button:hover:not(:disabled) {
+      filter: brightness(1.15);
+    }
+
+    button:active:not(:disabled) {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 #151829;
+    }
+
+    button:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+      background: var(--disabled);
+    }
+
+    /* 首頁 */
+    #homeScreen {
+      padding: 22px;
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+      gap: 14px;
+    }
+
+    .gameTitle {
+      text-align: center;
+      font-size: clamp(34px, 7vw, 64px);
+      font-weight: 900;
+      letter-spacing: 3px;
+      color: var(--accent);
+      text-shadow: 0 5px 0 rgba(0,0,0,0.4);
+      margin-top: 8px;
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: clamp(16px, 2.8vw, 24px);
+      color: var(--sub);
+      line-height: 1.4;
+    }
+
+    .startBtn {
+      display: block;
+      margin: 8px auto 0;
+      font-size: clamp(22px, 4vw, 34px);
+      font-weight: 900;
+      width: min(360px, 80%);
+      padding: 16px 24px;
+      background: linear-gradient(180deg, #ffcf5c, #f77f00);
+      color: #23120b;
+      box-shadow: 0 6px 0 #8a3f00;
+    }
+
+    .homePanels {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .sidePanel {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 18px;
+      padding: 14px;
+      overflow: auto;
+    }
+
+    .panelTitle {
+      font-size: clamp(18px, 3vw, 24px);
+      font-weight: 900;
+      color: var(--blue);
+      margin-bottom: 8px;
+    }
+
+    .recordLine, .collectionLine, .rankLine {
+      font-size: clamp(13px, 2.1vw, 18px);
+      color: var(--sub);
+      margin: 6px 0;
+      line-height: 1.3;
+    }
+
+    .smallBtn {
+      font-size: 13px;
+      padding: 7px 10px;
+      margin-top: 8px;
+      background: #343956;
+      box-shadow: none;
+    }
+
+    /* Boss登場 */
+    #bossIntro {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.78);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 30;
+      backdrop-filter: blur(3px);
+    }
+
+    .introCard {
+      width: 78%;
+      min-height: 42%;
+      border-radius: 26px;
+      background: linear-gradient(180deg, #3b1f54, #17192b);
+      border: 3px solid var(--accent);
+      box-shadow: 0 0 40px rgba(255,209,102,0.3);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      animation: introPop 0.25s ease-out;
+    }
+
+    @keyframes introPop {
+      from { transform: scale(0.85); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .introWarn {
+      color: var(--danger);
+      font-size: clamp(24px, 5vw, 38px);
+      font-weight: 900;
+      margin-bottom: 10px;
+    }
+
+    .introBossIcon {
+      font-size: clamp(60px, 12vw, 100px);
+      margin-bottom: 8px;
+    }
+
+    .introBossName {
+      font-size: clamp(30px, 6vw, 52px);
+      font-weight: 900;
+      color: var(--accent);
+    }
+
+    .introBossHp {
+      margin-top: 8px;
+      font-size: clamp(20px, 4vw, 30px);
+      color: var(--sub);
+    }
+
+    /* 遊戲主畫面：1:1 */
+    #gameScreen {
+      display: grid;
+      grid-template-rows: 46px 190px 150px 230px 82px;
+      gap: 8px;
+      padding: 10px;
+    }
+
+    .topBar {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 14px;
+      padding: 6px 12px;
+      font-size: clamp(14px, 2.3vw, 20px);
+      font-weight: 700;
+    }
+
+    .topCenter {
+      text-align: center;
+      color: var(--accent);
+      font-size: clamp(18px, 3vw, 26px);
+      font-weight: 900;
+    }
+
+    .topRight {
+      text-align: right;
+      color: var(--sub);
+    }
+
+    .battleArea {
+      position: relative;
+      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.1);
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 1fr 0.22fr 1fr;
+      align-items: center;
+      padding: 8px 18px;
+    }
+
+    .battleArea.frenzy {
+      box-shadow: inset 0 0 35px rgba(239,71,111,0.55);
+      animation: shakeSmall 0.25s infinite alternate;
+    }
+
+    .battleArea.finalPhase {
+      background: radial-gradient(circle, rgba(155,93,229,0.22), rgba(0,0,0,0.12)), linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+    }
+
+    @keyframes shakeSmall {
+      from { transform: translateX(-1px); }
+      to { transform: translateX(1px); }
+    }
+
+    .fighter {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      min-width: 0;
+    }
+
+    .fighterIcon {
+      font-size: clamp(44px, 9vw, 76px);
+      line-height: 1;
+      transition: transform 0.18s;
+      filter: drop-shadow(0 8px 8px rgba(0,0,0,0.3));
+    }
+
+    .heroAttack .heroIcon {
+      animation: heroStrike 0.45s ease-out;
+    }
+
+    .bossAttack .bossIcon {
+      animation: bossStrike 0.45s ease-out;
+    }
+
+    @keyframes heroStrike {
+      0% { transform: translateX(0) scale(1); }
+      45% { transform: translateX(80px) scale(1.16); }
+      100% { transform: translateX(0) scale(1); }
+    }
+
+    @keyframes bossStrike {
+      0% { transform: translateX(0) scale(1); }
+      45% { transform: translateX(-80px) scale(1.16); }
+      100% { transform: translateX(0) scale(1); }
+    }
+
+    .fighterName {
+      font-size: clamp(16px, 3vw, 24px);
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .hpText {
+      font-size: clamp(12px, 2.2vw, 17px);
+      color: var(--sub);
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .barOuter {
+      width: min(180px, 100%);
+      height: 15px;
+      border-radius: 999px;
+      background: rgba(0,0,0,0.35);
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+
+    .barInner {
+      height: 100%;
+      width: 100%;
+      border-radius: 999px;
+      transition: width 0.25s;
+    }
+
+    .heroHpBar {
+      background: linear-gradient(90deg, #06d6a0, #4cc9f0);
+    }
+
+    .bossHpBar {
+      background: linear-gradient(90deg, #ef476f, #ffd166);
+    }
+
+    .vs {
+      text-align: center;
+      font-size: clamp(24px, 5vw, 44px);
+      font-weight: 900;
+      color: rgba(255,255,255,0.35);
+    }
+
+    .damageFloat {
+      position: absolute;
+      right: 20%;
+      top: 30px;
+      font-size: clamp(24px, 5vw, 40px);
+      font-weight: 900;
+      color: var(--accent);
+      text-shadow: 0 4px 0 rgba(0,0,0,0.5);
+      animation: floatUp 0.7s ease-out forwards;
+      pointer-events: none;
+    }
+
+    @keyframes floatUp {
+      from { transform: translateY(20px); opacity: 0; }
+      20% { opacity: 1; }
+      to { transform: translateY(-38px); opacity: 0; }
+    }
+
+    .questionArea {
+      background: rgba(255,255,255,0.07);
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.12);
+      padding: 10px 18px;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 6px;
+    }
+
+    .statusLine {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--sub);
+      font-size: clamp(13px, 2.2vw, 18px);
+      font-weight: 700;
+    }
+
+    .combo {
+      color: var(--accent);
+      font-size: clamp(18px, 3vw, 26px);
+      font-weight: 900;
+    }
+
+    .frenzyText {
+      color: var(--danger);
+      font-weight: 900;
+    }
+
+    .questionText {
+      text-align: center;
+      font-size: clamp(26px, 5.7vw, 54px);
+      font-weight: 900;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      line-height: 1.18;
+      white-space: pre-line;
+    }
+
+    .options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .optionBtn {
+      min-height: 96px;
+      font-size: clamp(20px, 4vw, 34px);
+      font-weight: 900;
+      text-align: left;
+      padding: 10px 16px;
+      background: linear-gradient(180deg, #39405f, #262a43);
+      line-height: 1.2;
+    }
+
+    .optionBtn.correct {
+      background: linear-gradient(180deg, #06d6a0, #028c6a);
+      color: #071b16;
+    }
+
+    .optionBtn.wrong {
+      background: linear-gradient(180deg, #ef476f, #a52142);
+    }
+
+    .bottomBar {
+      display: grid;
+      grid-template-columns: 1fr 1.25fr 0.8fr;
+      gap: 8px;
+      align-items: center;
+      background: rgba(255,255,255,0.06);
+      border-radius: 16px;
+      padding: 8px 10px;
+    }
+
+    .energy {
+      font-size: clamp(13px, 2.4vw, 20px);
+      font-weight: 900;
+      color: var(--blue);
+      line-height: 1.35;
+    }
+
+    .skillBox {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .skillBtn {
+      font-size: clamp(11px, 1.9vw, 16px);
+      font-weight: 900;
+      padding: 9px 8px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .skillBtn small {
+      font-size: 0.74em;
+    }
+
+    .timer {
+      text-align: right;
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 900;
+      color: var(--accent);
+    }
+
+    .timer.low {
+      color: var(--danger);
+      animation: pulse 0.6s infinite alternate;
+    }
+
+    @keyframes pulse {
+      from { transform: scale(1); }
+      to { transform: scale(1.07); }
+    }
+
+    .feedback {
+      position: absolute;
+      left: 50%;
+      top: 49%;
+      transform: translate(-50%, -50%);
+      background: rgba(0,0,0,0.86);
+      border: 2px solid rgba(255,255,255,0.16);
+      border-radius: 20px;
+      padding: 20px 26px;
+      font-size: clamp(18px, 3vw, 28px);
+      text-align: center;
+      z-index: 20;
+      width: min(82%, 520px);
+      box-shadow: 0 18px 60px rgba(0,0,0,0.45);
+    }
+
+    .feedback .big {
+      font-size: clamp(26px, 5vw, 42px);
+      font-weight: 900;
+      margin-bottom: 8px;
+    }
+
+    .feedback.good .big {
+      color: var(--good);
+    }
+
+    .feedback.bad .big {
+      color: var(--danger);
+    }
+
+    .feedback .explain {
+      color: var(--sub);
+      font-size: clamp(14px, 2.5vw, 20px);
+      line-height: 1.4;
+    }
+
+    /* 結算 */
+    #resultScreen {
+      padding: 18px;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 12px;
+    }
+
+    .resultTitle {
+      text-align: center;
+      font-size: clamp(34px, 7vw, 56px);
+      font-weight: 900;
+      color: var(--accent);
+      margin: 0;
+    }
+
+    .rankTitle {
+      text-align: center;
+      font-size: clamp(24px, 5vw, 40px);
+      font-weight: 900;
+      color: var(--good);
+      margin: 4px 0 10px;
+    }
+
+    .resultMain {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .resultCard {
+      min-height: 0;
+      overflow: auto;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 20px;
+      padding: 16px;
+    }
+
+    .statGrid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .stat {
+      background: rgba(0,0,0,0.18);
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-size: clamp(13px, 2.2vw, 18px);
+      color: var(--sub);
+    }
+
+    .stat strong {
+      display: block;
+      color: var(--text);
+      font-size: clamp(20px, 4vw, 30px);
+      margin-top: 3px;
+    }
+
+    .typeStat {
+      font-size: clamp(15px, 2.5vw, 22px);
+      margin: 9px 0;
+      color: var(--sub);
+    }
+
+    .resultActions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .actionBtn {
+      font-size: clamp(16px, 3vw, 22px);
+      font-weight: 900;
+      padding: 12px 16px;
+    }
+
+    .nameInput {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 2px solid rgba(255,255,255,0.18);
+      background: rgba(0,0,0,0.25);
+      color: var(--text);
+      font-size: clamp(16px, 3vw, 22px);
+      margin-top: 10px;
+      outline: none;
+    }
+
+    @media (max-height: 700px) {
+      #gameScreen {
+        grid-template-rows: 42px 160px 125px 200px 72px;
+        gap: 6px;
+        padding: 8px;
+      }
+
+      .optionBtn {
+        min-height: 80px;
+      }
+
+      .fighterIcon {
+        font-size: 46px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <div id="homeScreen" class="screen">
+      <div>
+        <div class="gameTitle">三角函數魔王塔</div>
+        <div class="subtitle">20題內，你能擊敗幾隻魔王？<br>特殊角、象限正負、函數變化、轉換公式混合挑戰。</div>
+        <button class="startBtn" onclick="startGame()">開始挑戰</button>
+      </div>
+
+      <div class="homePanels">
+        <div class="sidePanel">
+          <div class="panelTitle">最高紀錄</div>
+          <div id="bestRecords"></div>
+          <button class="smallBtn" onclick="resetData()">清除本機紀錄</button>
+        </div>
+
+        <div class="sidePanel">
+          <div class="panelTitle">Boss Collection</div>
+          <div id="bossCollection"></div>
+          <hr style="border-color:rgba(255,255,255,0.12)">
+          <div class="panelTitle">本機排行榜 Top 10</div>
+          <div id="homeLeaderboard"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="gameScreen" class="screen hidden">
+      <div class="topBar">
+        <div>三角函數魔王塔</div>
+        <div class="topCenter" id="questionCount">Q1 / 20</div>
+        <div class="topRight" id="phaseText">基礎混合題</div>
+      </div>
+
+      <div class="battleArea" id="battleArea">
+        <div class="fighter" id="heroSide">
+          <div class="fighterIcon heroIcon">🧙‍♂️</div>
+          <div class="fighterName">勇者</div>
+          <div class="hpText" id="heroHpText">HP 50 / 50</div>
+          <div class="barOuter"><div class="barInner heroHpBar" id="heroHpBar"></div></div>
+        </div>
+
+        <div class="vs">VS</div>
+
+        <div class="fighter" id="bossSide">
+          <div class="fighterIcon bossIcon" id="bossIcon">👾</div>
+          <div class="fighterName" id="bossName">史萊姆王</div>
+          <div class="hpText" id="bossHpText">HP 500 / 500</div>
+          <div class="barOuter"><div class="barInner bossHpBar" id="bossHpBar"></div></div>
+        </div>
+      </div>
+
+      <div class="questionArea">
+        <div class="statusLine">
+          <div class="combo" id="comboText">Combo x0</div>
+          <div id="frenzyText"></div>
+        </div>
+
+        <div class="questionText" id="questionText">題目</div>
+      </div>
+
+      <div class="options" id="options"></div>
+
+      <div class="bottomBar">
+        <div class="energy" id="energyText">能量 ○○○○○○○</div>
+
+        <div class="skillBox">
+          <button class="skillBtn" id="eyeBtn" onclick="useEye()">單位圓之眼<br><small>3能量</small></button>
+          <button class="skillBtn" id="timeBtn" onclick="useTimeFreeze()">時間凍結<br><small>5能量</small></button>
+          <button class="skillBtn" id="critBtn" onclick="useCrit()">暴擊斬<br><small>7能量</small></button>
+        </div>
+
+        <div class="timer" id="timerText">15秒</div>
+      </div>
+
+      <div id="bossIntro" class="hidden">
+        <div class="introCard">
+          <div class="introWarn">⚠ Boss 登場 ⚠</div>
+          <div class="introBossIcon" id="introBossIcon">👾</div>
+          <div class="introBossName" id="introBossName">史萊姆王</div>
+          <div class="introBossHp" id="introBossHp">HP 500</div>
+        </div>
+      </div>
+
+      <div id="feedback" class="feedback hidden"></div>
+    </div>
+
+    <div id="resultScreen" class="screen hidden">
+      <div>
+        <div class="resultTitle">挑戰結束</div>
+        <div class="rankTitle" id="finalTitle">稱號：三角大師</div>
+      </div>
+
+      <div class="resultMain">
+        <div class="resultCard">
+          <div class="statGrid">
+            <div class="stat">擊殺 Boss<strong id="rBoss">0 / 5</strong></div>
+            <div class="stat">總傷害<strong id="rDamage">0</strong></div>
+            <div class="stat">正確率<strong id="rAccuracy">0%</strong></div>
+            <div class="stat">平均作答<strong id="rAvgTime">0秒</strong></div>
+            <div class="stat">最高 Combo<strong id="rMaxCombo">0</strong></div>
+            <div class="stat">剩餘 HP<strong id="rHp">0</strong></div>
+          </div>
+
+          <input id="playerName" class="nameInput" maxlength="10" placeholder="輸入名稱，加入本機排行榜" />
+        </div>
+
+        <div class="resultCard">
+          <div class="panelTitle">題型表現</div>
+          <div id="typeStats"></div>
+          <hr style="border-color:rgba(255,255,255,0.12)">
+          <div class="panelTitle">本機排行榜 Top 10</div>
+          <div id="resultLeaderboard"></div>
+        </div>
+      </div>
+
+      <div class="resultActions">
+        <button class="actionBtn" onclick="saveRank()">儲存成績</button>
+        <button class="actionBtn" onclick="startGame()">再挑戰一次</button>
+        <button class="actionBtn" onclick="backHome()">回首頁</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const BOSSES = [
+      { name: "角度史萊姆王", hp: 500, icon: "🟢" },
+      { name: "象限狼人王", hp: 650, icon: "🐺" },
+      { name: "單位圓巨人", hp: 800, icon: "🧊" },
+      { name: "函數黑龍", hp: 950, icon: "🐉" },
+      { name: "三角魔神", hp: 1100, icon: "😈" }
+    ];
+
+    const HERO_MAX_HP = 50;
+
+    const ANGLES = [0,30,45,60,90,120,135,150,180,210,225,240,270,300,315,330,360];
+    const AXIS = [0,90,180,270,360];
+    const Q1 = [30,45,60];
+    const Q2 = [120,135,150];
+    const Q3 = [210,225,240];
+    const Q4 = [300,315,330];
+
+    const TRIG = {
+      sin: {
+        0:["0",0], 30:["1/2",0.5], 45:["√2/2",0.707], 60:["√3/2",0.866],
+        90:["1",1], 120:["√3/2",0.866], 135:["√2/2",0.707], 150:["1/2",0.5],
+        180:["0",0], 210:["-1/2",-0.5], 225:["-√2/2",-0.707], 240:["-√3/2",-0.866],
+        270:["-1",-1], 300:["-√3/2",-0.866], 315:["-√2/2",-0.707], 330:["-1/2",-0.5], 360:["0",0]
+      },
+      cos: {
+        0:["1",1], 30:["√3/2",0.866], 45:["√2/2",0.707], 60:["1/2",0.5],
+        90:["0",0], 120:["-1/2",-0.5], 135:["-√2/2",-0.707], 150:["-√3/2",-0.866],
+        180:["-1",-1], 210:["-√3/2",-0.866], 225:["-√2/2",-0.707], 240:["-1/2",-0.5],
+        270:["0",0], 300:["1/2",0.5], 315:["√2/2",0.707], 330:["√3/2",0.866], 360:["1",1]
+      },
+      tan: {
+        0:["0",0], 30:["√3/3",0.577], 45:["1",1], 60:["√3",1.732],
+        90:["無定義",null], 120:["-√3",-1.732], 135:["-1",-1], 150:["-√3/3",-0.577],
+        180:["0",0], 210:["√3/3",0.577], 225:["1",1], 240:["√3",1.732],
+        270:["無定義",null], 300:["-√3",-1.732], 315:["-1",-1], 330:["-√3/3",-0.577], 360:["0",0]
+      }
+    };
+
+    const VALUE_POOL = ["-√3", "-1", "-√3/2", "-√2/2", "-1/2", "-√3/3", "0", "√3/3", "1/2", "√2/2", "√3/2", "1", "√3", "無定義"];
+    const BASIC_TYPE_LABEL = {
+      special: "特殊角值",
+      sign: "象限正負",
+      variation: "函數變化",
+      transform: "轉換公式",
+      equal: "等值判斷",
+      compare: "比較大小",
+      operation: "雙函數運算",
+      judge: "綜合判斷"
+    };
+
+    let state = null;
+    let timer = null;
+    let currentRankSaved = false;
+
+    function zoneOf(angle) {
+      if (AXIS.includes(angle)) return "axis";
+      if (Q1.includes(angle)) return "Q1";
+      if (Q2.includes(angle)) return "Q2";
+      if (Q3.includes(angle)) return "Q3";
+      return "Q4";
+    }
+
+    function rand(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function unique(arr) {
+      return [...new Set(arr)];
+    }
+
+    function makeMCQ(question, correct, distractors, meta = {}) {
+      let options = unique([correct, ...distractors.filter(x => x !== correct)]);
+      for (const item of shuffle(VALUE_POOL)) {
+        if (options.length >= 4) break;
+        if (!options.includes(item) && item !== correct) options.push(item);
+      }
+      options = shuffle(options.slice(0, 4));
+      return {
+        ...meta,
+        question,
+        options,
+        answer: options.indexOf(correct)
+      };
+    }
+
+    function signText(func, angle) {
+      const value = TRIG[func][angle][1];
+      if (value === null) return "無定義";
+      if (value > 0) return "正";
+      if (value < 0) return "負";
+      return "0";
+    }
+
+    function generateSpecial(angle = rand(ANGLES), func = rand(["sin","cos","tan"])) {
+      const correct = TRIG[func][angle][0];
+      const sameAngleOther = ["sin","cos","tan"].filter(f => f !== func).map(f => TRIG[f][angle][0]);
+      const signFlip = correct.startsWith("-") ? correct.slice(1) : (correct === "0" || correct === "無定義" ? "" : "-" + correct);
+      const refAngles = {30:60,60:30,120:150,150:120,210:240,240:210,300:330,330:300};
+      const refWrong = refAngles[angle] ? TRIG[func][refAngles[angle]][0] : "";
+      const distractors = [signFlip, refWrong, ...sameAngleOther, "0", "1", "-1", "無定義"].filter(Boolean);
+
+      return makeMCQ(
+        `${func}${angle}° = ?`,
+        correct,
+        distractors,
+        {
+          id: "A" + Math.random(),
+          type: "special",
+          angle,
+          zone: zoneOf(angle),
+          explanation: `${angle}° 的 ${func} 值為 ${correct}。`
+        }
+      );
+    }
+
+    function generateSign(targetKind = null) {
+      let candidates = [];
+      for (const func of ["sin","cos","tan"]) {
+        for (const angle of ANGLES) {
+          const s = signText(func, angle);
+          if (!targetKind || s === targetKind) candidates.push({ func, angle, s });
+        }
+      }
+      const item = rand(candidates);
+      return makeMCQ(
+        `${item.func}${item.angle}° 的值為？`,
+        item.s,
+        ["正", "負", "0", "無定義"],
+        {
+          id: "B" + Math.random(),
+          type: "sign",
+          angle: item.angle,
+          zone: zoneOf(item.angle),
+          explanation: `${item.func}${item.angle}° 的值為 ${TRIG[item.func][item.angle][0]}，所以判定為「${item.s}」。`
+        }
+      );
+    }
+
+    const VARIATION_TEMPLATES = [
+      ["第一象限中，若θ增加，sinθ會？", "變大", ["變小", "不變", "無法判斷"], "第一象限中，θ增加時，sinθ由0增加到1。"],
+      ["第二象限中，若θ增加，sinθ會？", "變小", ["變大", "不變", "無法判斷"], "第二象限中，θ增加時，sinθ由1減少到0。"],
+      ["第三象限中，若θ增加，sinθ會？", "變小", ["變大", "不變", "無法判斷"], "第三象限中，θ增加時，sinθ由0減少到-1。"],
+      ["第四象限中，若θ增加，sinθ會？", "變大", ["變小", "不變", "無法判斷"], "第四象限中，θ增加時，sinθ由-1增加到0。"],
+
+      ["第一象限中，若θ增加，cosθ會？", "變小", ["變大", "不變", "無法判斷"], "第一象限中，θ增加時，cosθ由1減少到0。"],
+      ["第二象限中，若θ增加，cosθ會？", "變小", ["變大", "不變", "無法判斷"], "第二象限中，θ增加時，cosθ由0減少到-1。"],
+      ["第三象限中，若θ增加，cosθ會？", "變大", ["變小", "不變", "無法判斷"], "第三象限中，θ增加時，cosθ由-1增加到0。"],
+      ["第四象限中，若θ增加，cosθ會？", "變大", ["變小", "不變", "無法判斷"], "第四象限中，θ增加時，cosθ由0增加到1。"],
+
+      ["第一象限中，若θ增加，tanθ會？", "變大", ["變小", "不變", "無法判斷"], "tanθ在每個象限內皆為遞增。"],
+      ["第二象限中，若θ增加，tanθ會？", "變大", ["變小", "不變", "無法判斷"], "tanθ在每個象限內皆為遞增。"],
+      ["第三象限中，若θ增加，tanθ會？", "變大", ["變小", "不變", "無法判斷"], "tanθ在每個象限內皆為遞增。"],
+      ["第四象限中，若θ增加，tanθ會？", "變大", ["變小", "不變", "無法判斷"], "tanθ在每個象限內皆為遞增。"],
+
+      ["sin30° 與 sin60° 何者較大？", "sin60°", ["sin30°", "相等", "無法判斷"], "第一象限中sin值隨角度增加而變大，所以sin60°較大。"],
+      ["sin120° 與 sin150° 何者較大？", "sin120°", ["sin150°", "相等", "無法判斷"], "第二象限中sin值隨角度增加而變小，所以sin120°較大。"],
+      ["sin210° 與 sin240° 何者較大？", "sin210°", ["sin240°", "相等", "無法判斷"], "第三象限中sin值隨角度增加而變小，所以sin210°較大。"],
+      ["sin300° 與 sin330° 何者較大？", "sin330°", ["sin300°", "相等", "無法判斷"], "第四象限中sin值隨角度增加而變大，所以sin330°較大。"],
+
+      ["cos30° 與 cos60° 何者較大？", "cos30°", ["cos60°", "相等", "無法判斷"], "第一象限中cos值隨角度增加而變小，所以cos30°較大。"],
+      ["cos120° 與 cos150° 何者較大？", "cos120°", ["cos150°", "相等", "無法判斷"], "第二象限中cos值隨角度增加而變小，所以cos120°較大。"],
+      ["cos210° 與 cos240° 何者較大？", "cos240°", ["cos210°", "相等", "無法判斷"], "第三象限中cos值隨角度增加而變大，所以cos240°較大。"],
+      ["cos300° 與 cos330° 何者較大？", "cos330°", ["cos300°", "相等", "無法判斷"], "第四象限中cos值隨角度增加而變大，所以cos330°較大。"],
+
+      ["第二象限中，sinθ 與 cosθ 何者一定較大？", "sinθ", ["cosθ", "相等", "不一定"], "第二象限中sinθ為正、cosθ為負，所以sinθ一定較大。"],
+      ["第三象限中，sinθ 與 cosθ 何者一定較大？", "不一定", ["sinθ", "cosθ", "相等"], "第三象限中兩者皆負，大小會因角度而不同。"],
+      ["第四象限中，cosθ 與 sinθ 何者一定較大？", "cosθ", ["sinθ", "相等", "不一定"], "第四象限中cosθ為正、sinθ為負，所以cosθ一定較大。"],
+      ["第一象限中，sinθ 與 cosθ 何者一定較大？", "不一定", ["sinθ", "cosθ", "相等"], "第一象限中兩者皆正，45°前後大小不同。"]
+    ];
+
+    function generateVariation() {
+      const [q, ans, wrongs, exp] = rand(VARIATION_TEMPLATES);
+      return makeMCQ(q, ans, wrongs, {
+        id: "C" + Math.random(),
+        type: "variation",
+        explanation: exp
+      });
+    }
+
+    const TRANSFORMS = [
+      ["90", "sin(90° − θ) = ?", "cosθ", "90°−θ 時，sin 轉為 cos，且為正。"],
+      ["90", "sin(90° + θ) = ?", "cosθ", "90°+θ 時，sin 轉為 cos，且為正。"],
+      ["90", "cos(90° − θ) = ?", "sinθ", "90°−θ 時，cos 轉為 sin，且為正。"],
+      ["90", "cos(90° + θ) = ?", "-sinθ", "90°+θ 時，cos 轉為 sin，且為負。"],
+      ["90", "tan(90° − θ) = ?", "1/tanθ", "90°−θ 時，tan 轉為 1/tanθ，且為正。"],
+      ["90", "tan(90° + θ) = ?", "-1/tanθ", "90°+θ 時，tan 轉為 1/tanθ，且為負。"],
+
+      ["180", "sin(180° − θ) = ?", "sinθ", "180°−θ 時，sin 不變函數，且為正。"],
+      ["180", "sin(180° + θ) = ?", "-sinθ", "180°+θ 時，sin 不變函數，且為負。"],
+      ["180", "cos(180° − θ) = ?", "-cosθ", "180°−θ 時，cos 不變函數，且為負。"],
+      ["180", "cos(180° + θ) = ?", "-cosθ", "180°+θ 時，cos 不變函數，且為負。"],
+      ["180", "tan(180° − θ) = ?", "-tanθ", "180°−θ 時，tan 不變函數，且為負。"],
+      ["180", "tan(180° + θ) = ?", "tanθ", "180°+θ 時，tan 不變函數，且為正。"],
+
+      ["270", "sin(270° − θ) = ?", "-cosθ", "270°−θ 時，sin 轉為 cos，且為負。"],
+      ["270", "sin(270° + θ) = ?", "-cosθ", "270°+θ 時，sin 轉為 cos，且為負。"],
+      ["270", "cos(270° − θ) = ?", "-sinθ", "270°−θ 時，cos 轉為 sin，且為負。"],
+      ["270", "cos(270° + θ) = ?", "sinθ", "270°+θ 時，cos 轉為 sin，且為正。"],
+      ["270", "tan(270° − θ) = ?", "1/tanθ", "270°−θ 時，tan 轉為 1/tanθ，且為正。"],
+      ["270", "tan(270° + θ) = ?", "-1/tanθ", "270°+θ 時，tan 轉為 1/tanθ，且為負。"],
+
+      ["360", "sin(360° − θ) = ?", "-sinθ", "360°−θ 時，sin 不變函數，且為負。"],
+      ["360", "sin(360° + θ) = ?", "sinθ", "360°+θ 時，sin 不變函數，且為正。"],
+      ["360", "cos(360° − θ) = ?", "cosθ", "360°−θ 時，cos 不變函數，且為正。"],
+      ["360", "cos(360° + θ) = ?", "cosθ", "360°+θ 時，cos 不變函數，且為正。"],
+      ["360", "tan(360° − θ) = ?", "-tanθ", "360°−θ 時，tan 不變函數，且為負。"],
+      ["360", "tan(360° + θ) = ?", "tanθ", "360°+θ 時，tan 不變函數，且為正。"]
+    ];
+
+    function generateTransform(subtype = null) {
+      const pool = subtype ? TRANSFORMS.filter(x => x[0] === subtype) : TRANSFORMS;
+      const [st, q, ans, exp] = rand(pool);
+      return makeMCQ(
+        q,
+        ans,
+        ["sinθ", "-sinθ", "cosθ", "-cosθ", "tanθ", "-tanθ", "1/tanθ", "-1/tanθ"],
+        {
+          id: "D" + Math.random(),
+          type: "transform",
+          subtype: st,
+          explanation: exp
+        }
+      );
+    }
+
+    function allFiniteTerms() {
+      const terms = [];
+      for (const func of ["sin","cos","tan"]) {
+        for (const angle of ANGLES) {
+          const [s, v] = TRIG[func][angle];
+          if (v !== null) {
+            terms.push({ label: `${func}${angle}°`, value: v, key: s });
+          }
+        }
+      }
+      return terms;
+    }
+
+    function generateEqual() {
+      const terms = allFiniteTerms();
+      let target, correct;
+      for (let i = 0; i < 100; i++) {
+        target = rand(terms);
+        const equals = terms.filter(t => t.key === target.key && t.label !== target.label);
+        if (equals.length) {
+          correct = rand(equals);
+          break;
+        }
+      }
+      const wrongs = shuffle(terms.filter(t => t.key !== target.key)).slice(0, 8).map(t => t.label);
+      return makeMCQ(
+        `下列何者與 ${target.label} 相等？`,
+        correct.label,
+        wrongs,
+        {
+          id: "E" + Math.random(),
+          type: "equal",
+          explanation: `${target.label} = ${target.key}，而 ${correct.label} 也等於 ${target.key}。`
+        }
+      );
+    }
+
+    function generateCompare() {
+      const terms = allFiniteTerms();
+      let picked = [];
+      for (let i = 0; i < 100; i++) {
+        picked = shuffle(terms).slice(0, 4);
+        const values = picked.map(t => t.value.toFixed(3));
+        if (unique(values).length === 4) break;
+      }
+      const mode = Math.random() < 0.5 ? "最大" : "最小";
+      const correct = picked.reduce((best, cur) => {
+        if (mode === "最大") return cur.value > best.value ? cur : best;
+        return cur.value < best.value ? cur : best;
+      }, picked[0]);
+
+      const options = picked.map(t => t.label);
+      return makeMCQ(
+        `下列何者${mode}？`,
+        correct.label,
+        options.filter(x => x !== correct.label),
+        {
+          id: "F" + Math.random(),
+          type: "compare",
+          explanation: `比較四個三角值後，${correct.label} 為${mode}。`
+        }
+      );
+    }
+
+    const OPERATION_TEMPLATES = [
+      ["sin150° + cos60° = ?", "1", ["0", "1/2", "√2", "√3"], "sin150°=1/2，cos60°=1/2，所以和為1。"],
+      ["sin45° × cos45° = ?", "1/2", ["1", "√2/2", "√2", "0"], "sin45°=cos45°=√2/2，相乘為1/2。"],
+      ["tan225° + cos180° = ?", "0", ["1", "2", "-2", "-1"], "tan225°=1，cos180°=-1，所以和為0。"],
+      ["sin90° + cos180° = ?", "0", ["1", "2", "-1", "無定義"], "sin90°=1，cos180°=-1，所以和為0。"],
+      ["cos120° + sin210° = ?", "-1", ["0", "1", "-1/2", "-√3/2"], "cos120°=-1/2，sin210°=-1/2，所以和為-1。"],
+      ["sin30° + tan45° = ?", "3/2", ["1", "1/2", "2", "√2"], "sin30°=1/2，tan45°=1，所以和為3/2。"],
+      ["cos300° - sin30° = ?", "0", ["1", "1/2", "-1/2", "-1"], "cos300°=1/2，sin30°=1/2，所以差為0。"],
+      ["sin270° + cos0° = ?", "0", ["1", "-1", "2", "無定義"], "sin270°=-1，cos0°=1，所以和為0。"],
+      ["tan300° × cos60° = ?", "-√3/2", ["√3/2", "-√3", "-√3/3", "1/2"], "tan300°=-√3，cos60°=1/2，相乘為-√3/2。"],
+      ["sin135° - cos135° = ?", "√2", ["0", "√2/2", "-√2", "1"], "sin135°=√2/2，cos135°=-√2/2，所以差為√2。"]
+    ];
+
+    function generateOperation() {
+      const [q, ans, wrongs, exp] = rand(OPERATION_TEMPLATES);
+      return makeMCQ(q, ans, wrongs, {
+        id: "G" + Math.random(),
+        type: "operation",
+        explanation: exp
+      });
+    }
+
+    const JUDGE_TEMPLATES = [
+      ["第三象限中，sinθ + cosθ 一定為？", "負", ["正", "0", "不一定"], "第三象限中 sinθ<0 且 cosθ<0，所以和一定為負。"],
+      ["第四象限中，cosθ × tanθ 一定為？", "負", ["正", "0", "不一定"], "第四象限中 cosθ>0、tanθ<0，所以乘積一定為負。"],
+      ["第二象限中，sinθ × cosθ 一定為？", "負", ["正", "0", "不一定"], "第二象限中 sinθ>0、cosθ<0，所以乘積一定為負。"],
+      ["第三象限中，sinθ × cosθ 一定為？", "正", ["負", "0", "不一定"], "第三象限中 sinθ<0、cosθ<0，所以乘積一定為正。"],
+      ["第一象限中，sinθ + cosθ 一定為？", "正", ["負", "0", "不一定"], "第一象限中 sinθ>0、cosθ>0，所以和一定為正。"],
+      ["第四象限中，sinθ × cosθ 一定為？", "負", ["正", "0", "不一定"], "第四象限中 sinθ<0、cosθ>0，所以乘積一定為負。"],
+      ["第二象限中，tanθ × cosθ 一定為？", "正", ["負", "0", "不一定"], "第二象限中 tanθ<0、cosθ<0，所以乘積一定為正。"],
+      ["第三象限中，tanθ + cosθ 一定為？", "不一定", ["正", "負", "0"], "第三象限中 tanθ>0、cosθ<0，兩者相加不一定。"]
+    ];
+
+    function generateJudge() {
+      const [q, ans, wrongs, exp] = rand(JUDGE_TEMPLATES);
+      return makeMCQ(q, ans, wrongs, {
+        id: "H" + Math.random(),
+        type: "judge",
+        explanation: exp
+      });
+    }
+
+    function hasThreeConsecutiveSameType(arr) {
+      for (let i = 2; i < arr.length; i++) {
+        if (arr[i].type === arr[i-1].type && arr[i].type === arr[i-2].type) return true;
+      }
+      return false;
+    }
+
+    function buildQuestionSet() {
+      let base = [];
+
+      base.push(generateSpecial(rand(AXIS)));
+      base.push(generateSpecial(rand([...Q1, ...Q2])));
+      base.push(generateSpecial(rand([...Q3, ...Q4])));
+      base.push(generateSpecial(rand(ANGLES)));
+
+      base.push(generateSign("正"));
+      base.push(generateSign("負"));
+      base.push(generateSign("0"));
+      base.push(generateSign("無定義"));
+
+      base.push(generateVariation());
+      base.push(generateVariation());
+      base.push(generateVariation());
+      base.push(generateVariation());
+
+      base.push(generateTransform("90"));
+      base.push(generateTransform("180"));
+      base.push(generateTransform("270"));
+      base.push(generateTransform("360"));
+
+      for (let attempt = 0; attempt < 100; attempt++) {
+        const shuffled = shuffle(base);
+        if (!hasThreeConsecutiveSameType(shuffled)) {
+          base = shuffled;
+          break;
+        }
+      }
+
+      return [
+        ...base,
+        generateEqual(),
+        generateCompare(),
+        generateOperation(),
+        generateJudge()
+      ];
+    }
+
+    function startGame() {
+      clearInterval(timer);
+      currentRankSaved = false;
+
+      state = {
+        questions: buildQuestionSet(),
+        index: 0,
+        heroHp: HERO_MAX_HP,
+        energy: 0,
+        combo: 0,
+        maxCombo: 0,
+        frenzy: 0,
+        crit: false,
+        eyeUsed: false,
+        bossIndex: 0,
+        bossHp: BOSSES[0].hp,
+        totalDamage: 0,
+        correct: 0,
+        totalAnswered: 0,
+        totalTimeUsed: 0,
+        typeResult: {},
+        locked: false,
+        timeLeft: 15,
+        maxTime: 15,
+        finalResult: null
+      };
+
+      for (const key of Object.keys(BASIC_TYPE_LABEL)) {
+        state.typeResult[key] = { correct: 0, total: 0 };
+      }
+
+      showScreen("game");
+      showBossIntro();
+      renderQuestion();
+    }
+
+    function showScreen(name) {
+      document.getElementById("homeScreen").classList.add("hidden");
+      document.getElementById("gameScreen").classList.add("hidden");
+      document.getElementById("resultScreen").classList.add("hidden");
+      if (name === "home") document.getElementById("homeScreen").classList.remove("hidden");
+      if (name === "game") document.getElementById("gameScreen").classList.remove("hidden");
+      if (name === "result") document.getElementById("resultScreen").classList.remove("hidden");
+    }
+
+    function showBossIntro() {
+      const boss = BOSSES[Math.min(state.bossIndex, BOSSES.length - 1)];
+      document.getElementById("introBossIcon").textContent = boss.icon;
+      document.getElementById("introBossName").textContent = boss.name;
+      document.getElementById("introBossHp").textContent = `HP ${boss.hp}`;
+      const intro = document.getElementById("bossIntro");
+      intro.classList.remove("hidden");
+      setTimeout(() => intro.classList.add("hidden"), 850);
+    }
+
+    function renderQuestion() {
+      clearInterval(timer);
+      state.locked = false;
+      state.eyeUsed = false;
+      state.maxTime = 15;
+      state.timeLeft = 15;
+
+      if (state.index >= state.questions.length) {
+        finishGame();
+        return;
+      }
+
+      const q = state.questions[state.index];
+
+      document.getElementById("questionCount").textContent = `Q${state.index + 1} / 20`;
+      document.getElementById("phaseText").textContent = state.index >= 16 ? "⚔️ 魔神決戰" : "基礎混合題";
+      document.getElementById("questionText").textContent = q.question;
+
+      const options = document.getElementById("options");
+      options.innerHTML = "";
+      q.options.forEach((op, i) => {
+        const btn = document.createElement("button");
+        btn.className = "optionBtn";
+        btn.textContent = `${["A","B","C","D"][i]}. ${op}`;
+        btn.onclick = () => answerQuestion(i);
+        options.appendChild(btn);
+      });
+
+      updateUI();
+      startTimer();
+    }
+
+    function startTimer() {
+      updateTimer();
+      timer = setInterval(() => {
+        state.timeLeft--;
+        updateTimer();
+        if (state.timeLeft <= 0) {
+          clearInterval(timer);
+          answerQuestion(-1);
+        }
+      }, 1000);
+    }
+
+    function updateTimer() {
+      const timerText = document.getElementById("timerText");
+      timerText.textContent = `${state.timeLeft}秒`;
+      timerText.classList.toggle("low", state.timeLeft <= 5);
+    }
+
+    function answerQuestion(choice) {
+      if (state.locked) return;
+      state.locked = true;
+      clearInterval(timer);
+
+      const q = state.questions[state.index];
+      const buttons = [...document.querySelectorAll(".optionBtn")];
+
+      const correct = choice === q.answer;
+      state.totalAnswered++;
+      state.totalTimeUsed += Math.max(0, state.maxTime - state.timeLeft);
+      state.typeResult[q.type].total++;
+
+      if (correct) {
+        buttons[choice].classList.add("correct");
+        state.correct++;
+        state.typeResult[q.type].correct++;
+
+        state.combo++;
+        state.maxCombo = Math.max(state.maxCombo, state.combo);
+        state.energy = Math.min(7, state.energy + 1);
+
+        if (state.combo >= 5 && state.heroHp > 0) {
+          if (state.frenzy <= 0) state.frenzy = 3;
+          else state.frenzy = Math.min(3, state.frenzy + 1);
+        }
+
+        const damage = calculateDamage();
+        applyDamage(damage);
+        showFeedback(true, `造成 ${damage} 傷害`, "");
+        animateHeroAttack(damage);
+
+        if (state.frenzy > 0) state.frenzy--;
+
+        setTimeout(nextQuestion, 550);
+      } else {
+        if (choice >= 0 && buttons[choice]) buttons[choice].classList.add("wrong");
+        buttons[q.answer].classList.add("correct");
+
+        state.combo = 0;
+        state.frenzy = 0;
+        state.heroHp = Math.max(0, state.heroHp - 10);
+
+        showFeedback(false, `正確答案：${q.options[q.answer]}`, q.explanation);
+        animateBossAttack();
+
+        setTimeout(nextQuestion, 1100);
+      }
+
+      updateUI();
+    }
+
+    function nextQuestion() {
+      state.crit = false;
+      state.index++;
+      renderQuestion();
+    }
+
+    function calculateDamage() {
+      let base = 30;
+      if (state.timeLeft >= 12) base = 120;
+      else if (state.timeLeft >= 9) base = 90;
+      else if (state.timeLeft >= 6) base = 70;
+      else if (state.timeLeft >= 3) base = 50;
+
+      let comboRate = 1;
+      if (state.combo >= 12) comboRate = 1.8;
+      else if (state.combo >= 8) comboRate = 1.6;
+      else if (state.combo >= 5) comboRate = 1.4;
+      else if (state.combo >= 3) comboRate = 1.2;
+
+      let frenzyRate = state.frenzy > 0 && state.heroHp > 0 ? 1.5 : 1;
+      let finalRate = state.index >= 16 ? 1.5 : 1;
+      let critRate = state.crit ? 3 : 1;
+
+      return Math.min(500, Math.round(base * comboRate * frenzyRate * finalRate * critRate));
+    }
+
+    function applyDamage(amount) {
+      state.totalDamage += amount;
+      let dmg = amount;
+
+      while (dmg > 0 && state.bossIndex < BOSSES.length) {
+        if (dmg >= state.bossHp) {
+          dmg -= state.bossHp;
+          unlockBoss(state.bossIndex);
+          state.bossIndex++;
+
+          if (state.bossIndex < BOSSES.length) {
+            state.bossHp = BOSSES[state.bossIndex].hp;
+            showBossIntro();
+          }
+        } else {
+          state.bossHp -= dmg;
+          dmg = 0;
+        }
+      }
+    }
+
+    function updateUI() {
+      const boss = BOSSES[Math.min(state.bossIndex, BOSSES.length - 1)];
+      document.getElementById("bossIcon").textContent = state.bossIndex >= BOSSES.length ? "🏆" : boss.icon;
+      document.getElementById("bossName").textContent = state.bossIndex >= BOSSES.length ? "全部擊破" : boss.name;
+
+      const heroHpPercent = state.heroHp / HERO_MAX_HP * 100;
+      document.getElementById("heroHpText").textContent = `HP ${state.heroHp} / ${HERO_MAX_HP}`;
+      document.getElementById("heroHpBar").style.width = `${heroHpPercent}%`;
+
+      if (state.bossIndex >= BOSSES.length) {
+        document.getElementById("bossHpText").textContent = "HP 0 / 0";
+        document.getElementById("bossHpBar").style.width = "0%";
+      } else {
+        const maxHp = boss.hp;
+        const percent = Math.max(0, state.bossHp / maxHp * 100);
+        document.getElementById("bossHpText").textContent = `HP ${state.bossHp} / ${maxHp}`;
+        document.getElementById("bossHpBar").style.width = `${percent}%`;
+      }
+
+      document.getElementById("comboText").textContent = `Combo x${state.combo}`;
+      document.getElementById("frenzyText").textContent = state.frenzy > 0 && state.heroHp > 0 ? `🔥 狂暴剩餘 ${state.frenzy} 題` : (state.heroHp === 0 ? "HP歸零：無法啟動狂暴" : "");
+
+      document.getElementById("energyText").textContent = "能量 " + "●".repeat(state.energy) + "○".repeat(7 - state.energy);
+
+      document.getElementById("eyeBtn").disabled = state.energy < 3 || state.eyeUsed || state.locked;
+      document.getElementById("timeBtn").disabled = state.energy < 5 || state.locked;
+      document.getElementById("critBtn").disabled = state.energy < 7 || state.crit || state.locked;
+
+      const battle = document.getElementById("battleArea");
+      battle.classList.toggle("frenzy", state.frenzy > 0 && state.heroHp > 0);
+      battle.classList.toggle("finalPhase", state.index >= 16);
+    }
+
+    function useEye() {
+      if (state.energy < 3 || state.eyeUsed || state.locked) return;
+      state.energy -= 3;
+      state.eyeUsed = true;
+
+      const q = state.questions[state.index];
+      const wrongIndexes = [0,1,2,3].filter(i => i !== q.answer);
+      const remove = shuffle(wrongIndexes).slice(0, 2);
+      const buttons = [...document.querySelectorAll(".optionBtn")];
+      remove.forEach(i => {
+        buttons[i].disabled = true;
+        buttons[i].style.visibility = "hidden";
+      });
+      updateUI();
+    }
+
+    function useTimeFreeze() {
+      if (state.energy < 5 || state.locked) return;
+      state.energy -= 5;
+      state.maxTime = 25;
+      state.timeLeft = Math.min(25, state.timeLeft + 10);
+      updateTimer();
+      updateUI();
+    }
+
+    function useCrit() {
+      if (state.energy < 7 || state.crit || state.locked) return;
+      state.energy -= 7;
+      state.crit = true;
+      showFeedback(true, "暴擊斬準備完成", "本題答對時，傷害 ×3。");
+      setTimeout(() => document.getElementById("feedback").classList.add("hidden"), 500);
+      updateUI();
+    }
+
+    function showFeedback(isGood, big, explain) {
+      const fb = document.getElementById("feedback");
+      fb.className = "feedback " + (isGood ? "good" : "bad");
+      fb.innerHTML = `<div class="big">${isGood ? "✓" : "✗"} ${big}</div><div class="explain">${explain || ""}</div>`;
+      fb.classList.remove("hidden");
+      setTimeout(() => fb.classList.add("hidden"), isGood ? 500 : 1050);
+    }
+
+    function animateHeroAttack(damage) {
+      const side = document.getElementById("heroSide");
+      side.classList.add("heroAttack");
+
+      const float = document.createElement("div");
+      float.className = "damageFloat";
+      float.textContent = `-${damage}`;
+      document.getElementById("battleArea").appendChild(float);
+
+      setTimeout(() => {
+        side.classList.remove("heroAttack");
+        float.remove();
+      }, 700);
+    }
+
+    function animateBossAttack() {
+      const side = document.getElementById("bossSide");
+      side.classList.add("bossAttack");
+      setTimeout(() => side.classList.remove("bossAttack"), 550);
+    }
+
+    function finishGame() {
+      clearInterval(timer);
+
+      const killed = Math.min(state.bossIndex, BOSSES.length);
+      const accuracy = state.totalAnswered ? Math.round(state.correct / state.totalAnswered * 100) : 0;
+      const avgTime = state.totalAnswered ? (state.totalTimeUsed / state.totalAnswered).toFixed(1) : "0.0";
+
+      const title = getTitle(killed, accuracy, state.maxCombo);
+
+      state.finalResult = {
+        killed,
+        totalDamage: state.totalDamage,
+        accuracy,
+        avgTime: Number(avgTime),
+        maxCombo: state.maxCombo,
+        hp: state.heroHp,
+        title,
+        date: new Date().toLocaleDateString()
+      };
+
+      document.getElementById("rBoss").textContent = `${killed} / 5`;
+      document.getElementById("rDamage").textContent = state.totalDamage;
+      document.getElementById("rAccuracy").textContent = `${accuracy}%`;
+      document.getElementById("rAvgTime").textContent = `${avgTime}秒`;
+      document.getElementById("rMaxCombo").textContent = state.maxCombo;
+      document.getElementById("rHp").textContent = state.heroHp;
+      document.getElementById("finalTitle").textContent = `稱號：${title}`;
+
+      const typeStats = document.getElementById("typeStats");
+      typeStats.innerHTML = "";
+      for (const type of ["special","sign","variation","transform","equal","compare","operation","judge"]) {
+        const r = state.typeResult[type];
+        if (!r || r.total === 0) continue;
+        const div = document.createElement("div");
+        div.className = "typeStat";
+        div.textContent = `${BASIC_TYPE_LABEL[type]}：${r.correct} / ${r.total}`;
+        typeStats.appendChild(div);
+      }
+
+      updateBestRecords(state.finalResult);
+      renderLeaderboard("resultLeaderboard");
+      showScreen("result");
+    }
+
+    function getTitle(killed, accuracy, maxCombo) {
+      if (killed >= 5 && accuracy >= 90 && maxCombo >= 10) return "單位圓之神";
+      if (killed >= 5) return "三角大師";
+      if (killed >= 4) return "象限騎士";
+      if (killed >= 3) return "單位圓戰士";
+      if (killed >= 2) return "象限學徒";
+      return "三角村村民";
+    }
+
+    function storageGet(key, fallback) {
+      try {
+        return JSON.parse(localStorage.getItem(key)) ?? fallback;
+      } catch {
+        return fallback;
+      }
+    }
+
+    function storageSet(key, value) {
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+
+    function unlockBoss(index) {
+      const unlocked = storageGet("trigBossUnlocked", []);
+      if (!unlocked.includes(index)) {
+        unlocked.push(index);
+        storageSet("trigBossUnlocked", unlocked);
+      }
+    }
+
+    function updateBestRecords(result) {
+      const best = storageGet("trigBossBest", {
+        highestBoss: 0,
+        highestCombo: 0,
+        highestAccuracy: 0,
+        fastestAvgTime: null,
+        highestDamage: 0,
+        playCount: 0
+      });
+
+      best.highestBoss = Math.max(best.highestBoss, result.killed);
+      best.highestCombo = Math.max(best.highestCombo, result.maxCombo);
+      best.highestAccuracy = Math.max(best.highestAccuracy, result.accuracy);
+      best.highestDamage = Math.max(best.highestDamage, result.totalDamage);
+      best.playCount += 1;
+
+      if (result.avgTime > 0) {
+        if (best.fastestAvgTime === null || result.avgTime < best.fastestAvgTime) {
+          best.fastestAvgTime = result.avgTime;
+        }
+      }
+
+      storageSet("trigBossBest", best);
+    }
+
+    function saveRank() {
+      if (!state?.finalResult || currentRankSaved) return;
+
+      const name = document.getElementById("playerName").value.trim() || "無名勇者";
+      const list = storageGet("trigBossRanks", []);
+
+      list.push({
+        name,
+        ...state.finalResult
+      });
+
+      list.sort((a,b) =>
+        b.killed - a.killed ||
+        b.totalDamage - a.totalDamage ||
+        b.accuracy - a.accuracy ||
+        a.avgTime - b.avgTime
+      );
+
+      storageSet("trigBossRanks", list.slice(0, 10));
+      currentRankSaved = true;
+      renderLeaderboard("resultLeaderboard");
+      renderHome();
+    }
+
+    function renderHome() {
+      const best = storageGet("trigBossBest", {
+        highestBoss: 0,
+        highestCombo: 0,
+        highestAccuracy: 0,
+        fastestAvgTime: null,
+        highestDamage: 0,
+        playCount: 0
+      });
+
+      document.getElementById("bestRecords").innerHTML = `
+        <div class="recordLine">最高擊殺：${best.highestBoss} / 5 王</div>
+        <div class="recordLine">最高傷害：${best.highestDamage}</div>
+        <div class="recordLine">最高 Combo：${best.highestCombo}</div>
+        <div class="recordLine">最高正確率：${best.highestAccuracy}%</div>
+        <div class="recordLine">最快平均：${best.fastestAvgTime === null ? "-" : best.fastestAvgTime + "秒"}</div>
+        <div class="recordLine">遊玩次數：${best.playCount}</div>
+      `;
+
+      const unlocked = storageGet("trigBossUnlocked", []);
+      document.getElementById("bossCollection").innerHTML = BOSSES.map((b, i) => {
+        const mark = unlocked.includes(i) ? "✓" : "□";
+        return `<div class="collectionLine">${mark} ${b.icon} ${b.name}</div>`;
+      }).join("");
+
+      renderLeaderboard("homeLeaderboard");
+    }
+
+    function renderLeaderboard(targetId) {
+      const list = storageGet("trigBossRanks", []);
+      const target = document.getElementById(targetId);
+      if (!target) return;
+
+      if (list.length === 0) {
+        target.innerHTML = `<div class="rankLine">尚無紀錄</div>`;
+        return;
+      }
+
+      target.innerHTML = list.map((r, i) => `
+        <div class="rankLine">
+          ${i + 1}. ${r.name}｜${r.killed}/5王｜傷害${r.totalDamage}｜${r.accuracy}%｜Combo ${r.maxCombo}
+        </div>
+      `).join("");
+    }
+
+    function backHome() {
+      renderHome();
+      showScreen("home");
+    }
+
+    function resetData() {
+      if (!confirm("確定要清除本機紀錄嗎？")) return;
+      localStorage.removeItem("trigBossBest");
+      localStorage.removeItem("trigBossRanks");
+      localStorage.removeItem("trigBossUnlocked");
+      renderHome();
+    }
+
+    renderHome();
+  </script>
+</body>
+</html>
