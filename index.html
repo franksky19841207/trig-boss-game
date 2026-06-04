@@ -733,7 +733,7 @@ button:disabled{
     </div>
 
     <div class="panel">
-      <div class="panelTitle clickableTitle" onclick="showBossModal()">Boss Collection <span class="clickHint">點開</span></div>
+      <div class="panelTitle clickableTitle" onclick="showBossModal()">Boss圖鑑 <span class="clickHint">點開</span></div>
       <div id="bossCollection"></div>
       <hr style="border-color:rgba(255,255,255,.12)">
       <div class="panelTitle clickableTitle" onclick="showRankModal()">排行榜 Top 10 <span class="clickHint">點開</span></div>
@@ -1297,10 +1297,37 @@ function answerQuestion(choice){
     state.maxFast12=Math.max(state.maxFast12,state.fast12);
 
     const dmg=calculateDamage();
-    applyDamage(dmg);
-    showFeedback(true,`造成 ${dmg} 傷害`,"");
+    const hitResult=applyDamage(dmg);
     animateHeroAttack(dmg);
 
+    if(hitResult.defeated.length>0){
+      updateUI();
+      const lastDefeated=hitResult.defeated[hitResult.defeated.length-1];
+
+      if(hitResult.cleared){
+        showFeedback(true,`🏆 恭喜通關！`,`${lastDefeated.icon} ${lastDefeated.name} 已被討伐<br>總傷害：${state.totalDamage}<br><br>點一下查看戰績`,true);
+      }else{
+        const nextBoss=BOSSES[state.bossIndex];
+        showFeedback(true,`💥 Boss擊破！`,`${lastDefeated.icon} ${lastDefeated.name} 已被討伐<br><br>下一位：${nextBoss.icon} ${nextBoss.name}<br>點一下迎接下一個 Boss`,true);
+      }
+
+      const fb=document.getElementById("feedback");
+      fb.onclick=()=>{
+        fb.classList.add("hidden");
+        fb.onclick=null;
+
+        if(hitResult.cleared){
+          finishGame();
+        }else{
+          showBossIntro();
+          nextQuestion();
+        }
+      };
+
+      return;
+    }
+
+    showFeedback(true,`造成 ${dmg} 傷害`,"");
     setTimeout(nextQuestion,520);
   }else{
     if(choice>=0&&buttons[choice])buttons[choice].classList.add("wrong");
@@ -1367,20 +1394,29 @@ function calculateDamage(){
 function applyDamage(amount){
   state.totalDamage+=amount;
   let dmg=amount;
+  const defeated=[];
+
   while(dmg>0&&state.bossIndex<BOSSES.length){
     if(dmg>=state.bossHp){
       dmg-=state.bossHp;
+      const defeatedBoss=BOSSES[state.bossIndex];
+      defeated.push(defeatedBoss);
       unlockBoss(state.bossIndex);
       state.bossIndex++;
+
       if(state.bossIndex<BOSSES.length){
         state.bossHp=BOSSES[state.bossIndex].hp;
-        showBossIntro();
       }
     }else{
       state.bossHp-=dmg;
       dmg=0;
     }
   }
+
+  return {
+    defeated,
+    cleared: state.bossIndex>=BOSSES.length
+  };
 }
 
 function updateUI(){
@@ -1634,7 +1670,7 @@ function showBestModal(){
 
 function showBossModal(){
   const u=storageGet("trigBossUnlocked",[]);
-  openModal("Boss Collection", BOSSES.map((x,i)=>`
+  openModal("Boss圖鑑", BOSSES.map((x,i)=>`
     <div class="modalLine">${u.includes(i)?"✓":"□"} ${x.icon} ${x.name}<br><span style="color:var(--sub);font-size:.9em;">HP ${x.hp}</span></div>
   `).join(""));
 }
