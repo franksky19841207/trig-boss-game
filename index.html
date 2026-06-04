@@ -20,7 +20,11 @@
   --dark:#090a12;
 }
 
-*{box-sizing:border-box;user-select:none}
+*{
+  box-sizing:border-box;
+  user-select:none;
+  -webkit-tap-highlight-color:transparent;
+}
 
 body{
   margin:0;
@@ -40,7 +44,7 @@ body{
   padding:6px;
 }
 
-@supports not (height: 1dvh){
+@supports not (height: 100dvh){
   #app{
     width:min(94vw,94vh);
     height:min(94vw,94vh);
@@ -77,10 +81,11 @@ button:active:not(:disabled){
 }
 
 button:disabled{
-  opacity:.32;
+  opacity:.45;
   cursor:not-allowed;
 }
 
+/* 首頁 */
 #homeScreen{
   padding:20px;
   display:grid;
@@ -90,7 +95,7 @@ button:disabled{
 }
 
 .gameTitle{
-  font-size:clamp(34px,8vw,62px);
+  font-size:clamp(36px,8vw,62px);
   font-weight:900;
   color:var(--gold);
   text-shadow:0 5px 0 rgba(0,0,0,.45);
@@ -99,7 +104,7 @@ button:disabled{
 
 .subtitle{
   color:var(--sub);
-  font-size:clamp(15px,3.2vw,24px);
+  font-size:clamp(16px,3.2vw,24px);
   line-height:1.45;
   margin-top:8px;
 }
@@ -152,9 +157,10 @@ button:disabled{
   box-shadow:none;
 }
 
+/* 遊戲畫面 1:1 */
 #gameScreen{
   display:grid;
-  grid-template-rows:7% 22% 8% 17% 34% 12%;
+  grid-template-rows:7% 22% 8% 17% 36% 10%;
   gap:5px;
   padding:8px;
 }
@@ -251,6 +257,7 @@ button:disabled{
   padding:4px 10px;
   display:grid;
   grid-template-columns:1fr 1fr 1fr;
+  gap:6px;
   align-items:center;
   text-align:center;
   font-size:clamp(12px,2.5vw,20px);
@@ -261,8 +268,9 @@ button:disabled{
 .multiplier{color:var(--blue)}
 .timer{
   color:var(--gold);
-  font-size:clamp(20px,4.5vw,36px);
+  font-size:clamp(18px,4vw,30px);
 }
+
 .timer.low{
   color:var(--red);
   animation:pulse .6s infinite alternate;
@@ -321,18 +329,18 @@ button:disabled{
   background:linear-gradient(180deg,#ef476f,#a52142);
 }
 
-.bottomInfo{
+.bottomBar{
   background:rgba(255,255,255,.06);
   border-radius:14px;
-  padding:6px 10px;
+  padding:5px 8px;
   display:flex;
-  justify-content:center;
   align-items:center;
+  justify-content:center;
   text-align:center;
+  min-height:0;
   color:var(--sub);
-  font-size:clamp(13px,2.7vw,21px);
-  font-weight:900;
-  line-height:1.25;
+  font-size:clamp(11px,2.3vw,18px);
+  font-weight:800;
 }
 
 .feedback{
@@ -398,6 +406,7 @@ button:disabled{
   100%{transform:translateX(0) scale(1)}
 }
 
+/* Boss登場 */
 #bossIntro{
   position:absolute;
   inset:0;
@@ -449,6 +458,7 @@ button:disabled{
   font-size:clamp(20px,4vw,32px);
 }
 
+/* 結算 */
 #resultScreen{
   padding:14px;
   display:grid;
@@ -543,6 +553,7 @@ button:disabled{
 <body>
 <div id="app">
 
+<!-- 首頁 -->
 <div id="homeScreen" class="screen">
   <div>
     <div class="gameTitle">三角函數魔王塔</div>
@@ -569,12 +580,13 @@ button:disabled{
   <div class="line" style="text-align:center;">建議使用大屏或手機直式畫面</div>
 </div>
 
+<!-- 遊戲 -->
 <div id="gameScreen" class="screen hidden">
 
   <div class="topBar">
     <div>三角函數魔王塔</div>
     <div class="topCenter" id="questionCount">Q1 / 20</div>
-    <div class="topRight" id="phaseText">基礎題</div>
+    <div class="topRight" id="phaseText">基礎混合題</div>
   </div>
 
   <div class="battleArea" id="battleArea">
@@ -597,7 +609,7 @@ button:disabled{
 
   <div class="statusLine">
     <div class="combo" id="comboText">Combo x0</div>
-    <div class="multiplier" id="multiplierText">倍率 x1.0</div>
+    <div class="multiplier" id="multiplierText">倍率 ×1.0</div>
     <div class="timer" id="timerText">15秒</div>
   </div>
 
@@ -607,8 +619,8 @@ button:disabled{
 
   <div class="options" id="options"></div>
 
-  <div class="bottomInfo" id="bottomInfo">
-    答得越快、Combo越高，攻擊越強。
+  <div class="bottomBar">
+    連續答對可提高倍率，HP歸零或20題結束即結算
   </div>
 
   <div id="bossIntro" class="hidden">
@@ -623,6 +635,7 @@ button:disabled{
   <div id="feedback" class="feedback hidden"></div>
 </div>
 
+<!-- 結算 -->
 <div id="resultScreen" class="screen hidden">
   <div>
     <div class="resultTitle">挑戰結束</div>
@@ -662,11 +675,11 @@ button:disabled{
 
 <script>
 const BOSSES=[
-  {name:"角度史萊姆王",hp:450,icon:"👾"},
+  {name:"角度史萊姆王",hp:500,icon:"👾"},
   {name:"象限狼人王",hp:600,icon:"🐺"},
-  {name:"單位圓巨人",hp:750,icon:"🧊"},
-  {name:"函數黑龍",hp:900,icon:"🐉"},
-  {name:"三角魔神",hp:1000,icon:"😈"}
+  {name:"單位圓巨人",hp:700,icon:"🧊"},
+  {name:"函數黑龍",hp:800,icon:"🐉"},
+  {name:"三角魔神",hp:1050,icon:"😈"}
 ];
 
 const ANGLES=[0,30,45,60,90,120,135,150,180,210,225,240,270,300,315,330,360];
@@ -680,16 +693,9 @@ tan:{0:["0",0],30:["√3/3",.577],45:["1",1],60:["√3",1.732],90:["無定義",n
 };
 
 const VALUE_POOL=["-√3","-1","-√3/2","-√2/2","-1/2","-√3/3","0","√3/3","1/2","√2/2","√3/2","1","√3","無定義","3/2","-3/2","√2","-√2"];
-
 const TYPE_LABEL={
-special:"特殊角值",
-sign:"象限正負",
-variation:"函數變化",
-transform:"轉換公式",
-equal:"等值判斷",
-compare:"比較大小",
-operation:"雙函數運算",
-judge:"綜合判斷"
+special:"特殊角值",sign:"象限正負",variation:"函數變化",transform:"轉換公式",
+equal:"等值判斷",compare:"比較大小",operation:"雙函數運算",judge:"綜合判斷"
 };
 
 let state=null,timer=null,currentRankSaved=false;
@@ -706,7 +712,13 @@ function makeMCQ(question,correct,distractors,meta={}){
     if(!options.includes(item)&&item!==correct)options.push(item);
   }
   options=shuffle(options.slice(0,4));
-  return {...meta,question,options,answer:options.indexOf(correct),key:question};
+  return {
+    ...meta,
+    question,
+    options,
+    answer:options.indexOf(correct),
+    signature: meta.signature || question
+  };
 }
 
 function signText(func,angle){
@@ -725,6 +737,7 @@ function generateSpecial(angle=rand(ANGLES),func=rand(["sin","cos","tan"])){
   const distractors=[signFlip,refWrong?TRIG[func][refWrong][0]:"",...others,"0","1","-1","無定義"].filter(Boolean);
   return makeMCQ(`${func}${angle}° = ?`,correct,distractors,{
     type:"special",angle,zone:zoneOf(angle),
+    signature:`special-${func}-${angle}`,
     explanation:`${func}${angle}° = ${correct}。`
   });
 }
@@ -740,10 +753,12 @@ function generateSign(target=null){
   const x=rand(pool);
   return makeMCQ(`${x.f}${x.a}° 的值為？`,x.s,["正","負","0","無定義"],{
     type:"sign",angle:x.a,zone:zoneOf(x.a),
+    signature:`sign-${x.f}-${x.a}`,
     explanation:`${x.f}${x.a}° = ${TRIG[x.f][x.a][0]}，所以為「${x.s}」。`
   });
 }
 
+/* 新C題型：函數變化與比較 */
 const VARIATION_TEMPLATES=[
 ["第一象限中，若 θ 增加，sinθ 會？","變大",["變小","不變","無法判斷"],"第一象限中 sinθ 遞增，所以會變大。"],
 ["第二象限中，若 θ 增加，sinθ 會？","變小",["變大","不變","無法判斷"],"第二象限中 sinθ 遞減，所以會變小。"],
@@ -765,7 +780,11 @@ const VARIATION_TEMPLATES=[
 
 function generateVariation(){
   const [q,ans,wrong,exp]=rand(VARIATION_TEMPLATES);
-  return makeMCQ(q,ans,wrong,{type:"variation",explanation:exp});
+  return makeMCQ(q,ans,wrong,{
+    type:"variation",
+    signature:`variation-${q}`,
+    explanation:exp
+  });
 }
 
 const TRANSFORMS=[
@@ -775,18 +794,21 @@ const TRANSFORMS=[
 ["90","cos(90° + θ) = ?","-sinθ","90°+θ 時，cos 轉為 sin，且為負。"],
 ["90","tan(90° − θ) = ?","1/tanθ","90°−θ 時，tan 轉為 1/tanθ，且為正。"],
 ["90","tan(90° + θ) = ?","-1/tanθ","90°+θ 時，tan 轉為 1/tanθ，且為負。"],
+
 ["180","sin(180° − θ) = ?","sinθ","180°−θ 時，sin 不變函數，且為正。"],
 ["180","sin(180° + θ) = ?","-sinθ","180°+θ 時，sin 不變函數，且為負。"],
 ["180","cos(180° − θ) = ?","-cosθ","180°−θ 時，cos 不變函數，且為負。"],
 ["180","cos(180° + θ) = ?","-cosθ","180°+θ 時，cos 不變函數，且為負。"],
 ["180","tan(180° − θ) = ?","-tanθ","180°−θ 時，tan 不變函數，且為負。"],
 ["180","tan(180° + θ) = ?","tanθ","180°+θ 時，tan 不變函數，且為正。"],
+
 ["270","sin(270° − θ) = ?","-cosθ","270°−θ 時，sin 轉為 cos，且為負。"],
 ["270","sin(270° + θ) = ?","-cosθ","270°+θ 時，sin 轉為 cos，且為負。"],
 ["270","cos(270° − θ) = ?","-sinθ","270°−θ 時，cos 轉為 sin，且為負。"],
 ["270","cos(270° + θ) = ?","sinθ","270°+θ 時，cos 轉為 sin，且為正。"],
 ["270","tan(270° − θ) = ?","1/tanθ","270°−θ 時，tan 轉為 1/tanθ，且為正。"],
 ["270","tan(270° + θ) = ?","-1/tanθ","270°+θ 時，tan 轉為 1/tanθ，且為負。"],
+
 ["360","sin(360° − θ) = ?","-sinθ","360°−θ 時，sin 不變函數，且為負。"],
 ["360","sin(360° + θ) = ?","sinθ","360°+θ 時，sin 不變函數，且為正。"],
 ["360","cos(360° − θ) = ?","cosθ","360°−θ 時，cos 不變函數，且為正。"],
@@ -799,7 +821,9 @@ function generateTransform(sub=null){
   const pool=sub?TRANSFORMS.filter(x=>x[0]===sub):TRANSFORMS;
   const [s,q,ans,exp]=rand(pool);
   return makeMCQ(q,ans,["sinθ","-sinθ","cosθ","-cosθ","tanθ","-tanθ","1/tanθ","-1/tanθ"],{
-    type:"transform",subtype:s,explanation:exp
+    type:"transform",subtype:s,
+    signature:`transform-${q}`,
+    explanation:exp
   });
 }
 
@@ -824,7 +848,9 @@ function generateEqual(){
   }
   const wrongs=shuffle(terms.filter(t=>t.key!==target.key)).slice(0,8).map(t=>t.label);
   return makeMCQ(`下列何者與 ${target.label} 相等？`,correct.label,wrongs,{
-    type:"equal",angle:target.angle,explanation:`${target.label} = ${target.key}，${correct.label} 也等於 ${target.key}。`
+    type:"equal",angle:target.angle,
+    signature:`equal-${target.label}`,
+    explanation:`${target.label} = ${target.key}，${correct.label} 也等於 ${target.key}。`
   });
 }
 
@@ -838,7 +864,9 @@ function generateCompare(){
   const mode=Math.random()<.5?"最大":"最小";
   const correct=picked.reduce((b,c)=>mode==="最大"?(c.value>b.value?c:b):(c.value<b.value?c:b),picked[0]);
   return makeMCQ(`下列何者${mode}？`,correct.label,picked.map(t=>t.label).filter(x=>x!==correct.label),{
-    type:"compare",angle:correct.angle,explanation:`比較四個三角值後，${correct.label} 為${mode}。`
+    type:"compare",
+    signature:`compare-${mode}-${picked.map(t=>t.label).join("-")}`,
+    explanation:`比較四個三角值後，${correct.label} 為${mode}。`
   });
 }
 
@@ -855,7 +883,11 @@ const OPS=[
 
 function generateOperation(){
   const [q,ans,wrong,exp]=rand(OPS);
-  return makeMCQ(q,ans,wrong,{type:"operation",explanation:exp});
+  return makeMCQ(q,ans,wrong,{
+    type:"operation",
+    signature:`operation-${q}`,
+    explanation:exp
+  });
 }
 
 const JUDGES=[
@@ -871,7 +903,11 @@ const JUDGES=[
 
 function generateJudge(){
   const [q,ans,wrong,exp]=rand(JUDGES);
-  return makeMCQ(q,ans,wrong,{type:"judge",explanation:exp});
+  return makeMCQ(q,ans,wrong,{
+    type:"judge",
+    signature:`judge-${q}`,
+    explanation:exp
+  });
 }
 
 function has3Same(arr){
@@ -881,15 +917,15 @@ function has3Same(arr){
   return false;
 }
 
-function hasDuplicateQuestion(arr){
-  const keys=arr.map(q=>q.key);
-  return unique(keys).length!==keys.length;
+function hasDuplicateSignature(arr){
+  const sigs=arr.map(q=>q.signature);
+  return new Set(sigs).size!==sigs.length;
 }
 
 function violatesAngleCooldown(arr){
   for(let i=0;i<arr.length;i++){
-    if(arr[i].angle===undefined)return false;
-    for(let j=i+1;j<=i+2&&j<arr.length;j++){
+    if(arr[i].angle===undefined)continue;
+    for(let j=i+1;j<=Math.min(i+2,arr.length-1);j++){
       if(arr[j].angle!==undefined&&arr[i].angle===arr[j].angle)return true;
     }
   }
@@ -897,6 +933,8 @@ function violatesAngleCooldown(arr){
 }
 
 function buildQuestionSet(){
+  let finalSet=null;
+
   for(let attempt=0;attempt<300;attempt++){
     let base=[
       generateSpecial(rand(AXIS)),
@@ -920,76 +958,43 @@ function buildQuestionSet(){
       generateTransform("360")
     ];
 
-    base=shuffle(base);
+    for(let i=0;i<100;i++){
+      const s=shuffle(base);
+      if(!has3Same(s)){base=s;break}
+    }
 
-    const full=[
-      ...base,
-      generateEqual(),
-      generateCompare(),
-      generateOperation(),
-      generateJudge()
-    ];
+    const all=[...base,generateEqual(),generateCompare(),generateOperation(),generateJudge()];
 
-    if(!has3Same(full)&&!hasDuplicateQuestion(full)&&!violatesAngleCooldown(full)){
-      return full;
+    if(!hasDuplicateSignature(all)&&!violatesAngleCooldown(all)&&!has3Same(all)){
+      finalSet=all;
+      break;
     }
   }
+
+  if(finalSet)return finalSet;
 
   let fallback=[
     generateSpecial(rand(AXIS)),
     generateSpecial(rand([...Q1,...Q2])),
     generateSpecial(rand([...Q3,...Q4])),
     generateSpecial(rand(ANGLES)),
-    generateSign("正"),
-    generateSign("負"),
-    generateSign("0"),
-    generateSign("無定義"),
-    generateVariation(),
-    generateVariation(),
-    generateVariation(),
-    generateVariation(),
-    generateTransform("90"),
-    generateTransform("180"),
-    generateTransform("270"),
-    generateTransform("360"),
-    generateEqual(),
-    generateCompare(),
-    generateOperation(),
-    generateJudge()
+    generateSign("正"),generateSign("負"),generateSign("0"),generateSign("無定義"),
+    generateVariation(),generateVariation(),generateVariation(),generateVariation(),
+    generateTransform("90"),generateTransform("180"),generateTransform("270"),generateTransform("360")
   ];
 
-  return shuffle(fallback.slice(0,16)).concat(fallback.slice(16));
-}
-
-function comboRate(){
-  const c=state.combo;
-  if(c>=12)return 1.8;
-  if(c>=8)return 1.6;
-  if(c>=5)return 1.4;
-  if(c>=3)return 1.2;
-  return 1;
+  fallback=shuffle(fallback);
+  return [...fallback,generateEqual(),generateCompare(),generateOperation(),generateJudge()];
 }
 
 function startGame(){
   clearInterval(timer);
   currentRankSaved=false;
   state={
-    questions:buildQuestionSet(),
-    index:0,
-    heroHp:50,
-    combo:0,
-    maxCombo:0,
-    bossIndex:0,
-    bossHp:BOSSES[0].hp,
-    totalDamage:0,
-    correct:0,
-    totalAnswered:0,
-    totalTimeUsed:0,
-    locked:false,
-    timeLeft:15,
-    maxTime:15,
-    finalResult:null,
-    typeResult:{}
+    questions:buildQuestionSet(),index:0,
+    heroHp:50,combo:0,maxCombo:0,
+    bossIndex:0,bossHp:BOSSES[0].hp,totalDamage:0,correct:0,totalAnswered:0,totalTimeUsed:0,
+    locked:false,timeLeft:15,maxTime:15,finalResult:null,typeResult:{}
   };
   Object.keys(TYPE_LABEL).forEach(k=>state.typeResult[k]={correct:0,total:0});
   showScreen("game");
@@ -1019,10 +1024,7 @@ function renderQuestion(){
   state.maxTime=15;
   state.timeLeft=15;
 
-  if(state.index>=state.questions.length){
-    finishGame();
-    return;
-  }
+  if(state.index>=state.questions.length){finishGame();return}
 
   const q=state.questions[state.index];
   document.getElementById("questionCount").textContent=`Q${state.index+1} / 20`;
@@ -1048,10 +1050,7 @@ function startTimer(){
   timer=setInterval(()=>{
     state.timeLeft--;
     updateTimer();
-    if(state.timeLeft<=0){
-      clearInterval(timer);
-      answerQuestion(-1);
-    }
+    if(state.timeLeft<=0){clearInterval(timer);answerQuestion(-1)}
   },1000);
 }
 
@@ -1096,10 +1095,10 @@ function answerQuestion(choice){
 
     showFeedback(false,`正確答案：${q.options[q.answer]}`,q.explanation);
     animateBossAttack();
+    updateUI();
 
     if(state.heroHp<=0){
       setTimeout(finishGame,1100);
-      updateUI();
       return;
     }
 
@@ -1114,20 +1113,27 @@ function nextQuestion(){
   renderQuestion();
 }
 
+function comboRate(){
+  if(!state)return 1;
+  if(state.combo>=12)return 1.8;
+  if(state.combo>=8)return 1.6;
+  if(state.combo>=5)return 1.4;
+  if(state.combo>=3)return 1.2;
+  return 1;
+}
+
 function calculateDamage(){
   let base=30;
   if(state.timeLeft>=12)base=120;
   else if(state.timeLeft>=9)base=90;
   else if(state.timeLeft>=6)base=70;
   else if(state.timeLeft>=3)base=50;
-
   return Math.min(500,Math.round(base*comboRate()));
 }
 
 function applyDamage(amount){
   state.totalDamage+=amount;
   let dmg=amount;
-
   while(dmg>0&&state.bossIndex<BOSSES.length){
     if(dmg>=state.bossHp){
       dmg-=state.bossHp;
@@ -1163,8 +1169,7 @@ function updateUI(){
   }
 
   document.getElementById("comboText").textContent=`Combo x${state.combo}`;
-  document.getElementById("multiplierText").textContent=`倍率 x${comboRate().toFixed(1)}`;
-  document.getElementById("bottomInfo").textContent=`目前規則：基礎傷害 × Combo倍率。答錯 Combo 歸零，HP -10。`;
+  document.getElementById("multiplierText").textContent=`倍率 ×${comboRate().toFixed(1)}`;
 }
 
 function showFeedback(good,big,explain){
@@ -1198,16 +1203,7 @@ function finishGame(){
   const avg=state.totalAnswered?(state.totalTimeUsed/state.totalAnswered).toFixed(1):"0.0";
   const title=getTitle(killed,accuracy,state.maxCombo);
 
-  state.finalResult={
-    killed,
-    totalDamage:state.totalDamage,
-    accuracy,
-    avgTime:Number(avg),
-    maxCombo:state.maxCombo,
-    hp:state.heroHp,
-    title,
-    date:new Date().toLocaleDateString()
-  };
+  state.finalResult={killed,totalDamage:state.totalDamage,accuracy,avgTime:Number(avg),maxCombo:state.maxCombo,hp:state.heroHp,title,date:new Date().toLocaleDateString()};
 
   document.getElementById("rBoss").textContent=`${killed} / 5`;
   document.getElementById("rDamage").textContent=state.totalDamage;
@@ -1243,43 +1239,22 @@ function getTitle(killed,acc,combo){
   return"三角村村民";
 }
 
-function storageGet(k,f){
-  try{return JSON.parse(localStorage.getItem(k))??f}
-  catch{return f}
-}
-
-function storageSet(k,v){
-  localStorage.setItem(k,JSON.stringify(v));
-}
+function storageGet(k,f){try{return JSON.parse(localStorage.getItem(k))??f}catch{return f}}
+function storageSet(k,v){localStorage.setItem(k,JSON.stringify(v))}
 
 function unlockBoss(i){
   const u=storageGet("trigBossUnlocked",[]);
-  if(!u.includes(i)){
-    u.push(i);
-    storageSet("trigBossUnlocked",u);
-  }
+  if(!u.includes(i)){u.push(i);storageSet("trigBossUnlocked",u)}
 }
 
 function updateBestRecords(r){
-  const b=storageGet("trigBossBest",{
-    highestBoss:0,
-    highestCombo:0,
-    highestAccuracy:0,
-    fastestAvgTime:null,
-    highestDamage:0,
-    playCount:0
-  });
-
+  const b=storageGet("trigBossBest",{highestBoss:0,highestCombo:0,highestAccuracy:0,fastestAvgTime:null,highestDamage:0,playCount:0});
   b.highestBoss=Math.max(b.highestBoss,r.killed);
   b.highestCombo=Math.max(b.highestCombo,r.maxCombo);
   b.highestAccuracy=Math.max(b.highestAccuracy,r.accuracy);
   b.highestDamage=Math.max(b.highestDamage,r.totalDamage);
   b.playCount++;
-
-  if(r.avgTime>0&&(b.fastestAvgTime===null||r.avgTime<b.fastestAvgTime)){
-    b.fastestAvgTime=r.avgTime;
-  }
-
+  if(r.avgTime>0&&(b.fastestAvgTime===null||r.avgTime<b.fastestAvgTime))b.fastestAvgTime=r.avgTime;
   storageSet("trigBossBest",b);
 }
 
@@ -1288,14 +1263,7 @@ function saveRank(){
   const name=document.getElementById("playerName").value.trim()||"無名勇者";
   const list=storageGet("trigBossRanks",[]);
   list.push({name,...state.finalResult});
-
-  list.sort((a,b)=>
-    b.killed-a.killed||
-    b.totalDamage-a.totalDamage||
-    b.accuracy-a.accuracy||
-    a.avgTime-b.avgTime
-  );
-
+  list.sort((a,b)=>b.killed-a.killed||b.totalDamage-a.totalDamage||b.accuracy-a.accuracy||a.avgTime-b.avgTime);
   storageSet("trigBossRanks",list.slice(0,10));
   currentRankSaved=true;
   renderLeaderboard("resultLeaderboard");
@@ -1303,15 +1271,7 @@ function saveRank(){
 }
 
 function renderHome(){
-  const b=storageGet("trigBossBest",{
-    highestBoss:0,
-    highestCombo:0,
-    highestAccuracy:0,
-    fastestAvgTime:null,
-    highestDamage:0,
-    playCount:0
-  });
-
+  const b=storageGet("trigBossBest",{highestBoss:0,highestCombo:0,highestAccuracy:0,fastestAvgTime:null,highestDamage:0,playCount:0});
   document.getElementById("bestRecords").innerHTML=`
     <div class="line">最高擊殺：${b.highestBoss} / 5 王</div>
     <div class="line">最高傷害：${b.highestDamage}</div>
@@ -1322,10 +1282,7 @@ function renderHome(){
   `;
 
   const u=storageGet("trigBossUnlocked",[]);
-  document.getElementById("bossCollection").innerHTML=BOSSES.map((x,i)=>`
-    <div class="line">${u.includes(i)?"✓":"□"} ${x.icon} ${x.name}</div>
-  `).join("");
-
+  document.getElementById("bossCollection").innerHTML=BOSSES.map((x,i)=>`<div class="line">${u.includes(i)?"✓":"□"} ${x.icon} ${x.name}</div>`).join("");
   renderLeaderboard("homeLeaderboard");
 }
 
@@ -1333,15 +1290,8 @@ function renderLeaderboard(id){
   const list=storageGet("trigBossRanks",[]);
   const el=document.getElementById(id);
   if(!el)return;
-
-  if(list.length===0){
-    el.innerHTML=`<div class="line">尚無紀錄</div>`;
-    return;
-  }
-
-  el.innerHTML=list.map((r,i)=>`
-    <div class="line">${i+1}. ${r.name}｜${r.killed}/5王｜傷害${r.totalDamage}｜${r.accuracy}%｜C${r.maxCombo}</div>
-  `).join("");
+  if(list.length===0){el.innerHTML=`<div class="line">尚無紀錄</div>`;return}
+  el.innerHTML=list.map((r,i)=>`<div class="line">${i+1}. ${r.name}｜${r.killed}/5王｜傷害${r.totalDamage}｜${r.accuracy}%｜C${r.maxCombo}</div>`).join("");
 }
 
 function backHome(){
